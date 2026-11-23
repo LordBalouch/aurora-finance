@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Debt · Aurora{% endblock %}
+{% block heading %}Debt{% endblock %}
+{% block toolbar %}<a class="btn btn-primary" href="{% url 'web:debt_add' %}">Add a balance</a>{% endblock %}
+{% block content %}
+  <section class="grid grid-kpi" aria-label="Debt key figures">
+    <article class="card kpi"><span class="kpi-label">Debt</span><span class="kpi-value num">{{ debt_total|nok }}</span>
+      <span class="kpi-sub">{% if debt_as_of %}Latest balance, {{ debt_as_of|date:"j M Y" }}{% else %}No balances yet{% endif %}</span></article>
+    <article class="card kpi"><span class="kpi-label">Effective rate</span><span class="kpi-value num">{% if rate %}{{ rate }} %{% else %}—{% endif %}</span>
+      <span class="kpi-sub">{% if tax_year %}Interest / average debt, {{ tax_year }}{% else %}Needs a tax year{% endif %}</span></article>
+    <article class="card kpi"><span class="kpi-label">Interest per year</span><span class="kpi-value num">{{ interest_year|nok }}</span>
+      <span class="kpi-sub">{% if tax_year %}Tax settlement {{ tax_year }}{% endif %}</span></article>
+    <article class="card kpi"><span class="kpi-label">Paid on loans</span><span class="kpi-value num">{{ payments_total|nok }}</span>
+      <span class="kpi-sub">per month, bank data, last 12 months</span></article>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">Payoff plan</h2>
+      {% if aggregate %}<span class="chip">one total loan · estimated rate</span>{% endif %}</div>
+    <form class="filters" hx-get="{% url 'web:debt' %}" hx-target="#debt-plan" hx-swap="outerHTML" hx-trigger="input changed delay:400ms from:#extra, submit">
+      <div class="field"><label for="extra">Pay extra per month (kr)</label>
+        <input id="extra" name="extra" type="number" min="0" step="500" value="{{ extra }}" inputmode="numeric"></div>
+    </form>
+    {% include "web/_debt_plan.html" %}
+      {% include "web/_ai.html" with card="debt" %}
+    {% if aggregate %}<p class="note">All loans are treated as one, at the {{ rate }} % effective rate from the tax settlement and the loan payments seen in the bank. Add balances per lender (gjeldsregisteret.no) for a plan per loan, where extra money goes to the most expensive loan first.</p>{% endif %}
+  </section>
+
+  <section class="grid grid-2">
+    <article class="card table-card">
+      <div class="card-head pad"><h2 class="card-title">Loan payments in the bank</h2></div>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>Paid to</th><th class="right">Per month</th></tr></thead>
+        <tbody>{% for p in payments %}<tr><td>{{ p.merchant }}</td><td class="num right">{{ p.monthly|nok }}</td></tr>{% empty %}<tr><td colspan="2" class="muted">No payments in “Loans &amp; credit”.</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </article>
+    <article class="card table-card">
+      <div class="card-head pad"><h2 class="card-title">Balances</h2><span class="muted">Latest per lender</span></div>
+      <div class="table-wrap"><table class="table">
+        <thead><tr><th>Lender</th><th>As of</th><th class="right">Balance</th><th class="right">Rate</th><th></th></tr></thead>
+        <tbody>{% for b in balances %}<tr><td>{{ b.lender }} <span class="chip">{{ b.get_source_display }}</span></td><td class="num muted">{{ b.as_of|date:"d.m.Y" }}</td>
+          <td class="num right nowrap">{{ b.balance|nok }}</td><td class="num right nowrap">{% if b.annual_rate %}{{ b.annual_rate }} %{% else %}<span class="muted">—</span>{% endif %}</td>
+          <td class="right"><form method="post" action="{% url 'web:debt_delete' b.pk %}" data-confirm="Remove this balance?">{% csrf_token %}<button class="btn btn-ghost" type="submit" aria-label="Remove {{ b.lender }} {{ b.as_of }}">Remove</button></form></td></tr>
+        {% empty %}<tr><td colspan="5" class="muted">No balances yet.</td></tr>{% endfor %}</tbody>
+      </table></div>
+    </article>
+  </section>
+{% endblock %}

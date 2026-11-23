@@ -1,0 +1,2 @@
+{% if error %}<td colspan="5" class="msg-error">{{ error }}</td>{% else %}
+<td colspan="5"><span class="done">✓ <strong>{{ merchant }}</strong> → {{ category }} · {{ n }} transaction{{ n|pluralize }}. Future imports follow this rule.</span></td>{% endif %}

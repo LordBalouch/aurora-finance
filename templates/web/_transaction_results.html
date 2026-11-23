@@ -1,0 +1,25 @@
+{% load money %}
+<div class="stats stats-inline">
+  <div><span class="stat-label">Transactions</span><span class="stat-value num">{{ totals.n }}</span></div>
+  <div><span class="stat-label">Money in</span><span class="stat-value num pos">{{ totals.money_in|default:0|nok }}</span></div>
+  <div><span class="stat-label">Money out</span><span class="stat-value num neg">{{ totals.money_out|default:0|nok }}</span></div>
+</div>
+{% if page.object_list %}
+<div class="card table-card">
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Account</th><th class="right">Amount</th></tr></thead>
+      <tbody>{% include "web/_transaction_rows.html" %}</tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<section class="card empty">
+  {% if totals.n == 0 and not q and not account and not start and not end %}
+    <h2>No transactions yet</h2><p class="muted">Import a CSV export from your bank to get started.</p>
+    <a class="btn btn-primary" href="{% url 'web:import' %}">Import a file</a>
+  {% else %}
+    <h2>Nothing matches</h2><p class="muted">Try another search or a wider date range.</p>
+  {% endif %}
+</section>
+{% endif %}

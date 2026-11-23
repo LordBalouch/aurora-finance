@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Import · Aurora{% endblock %}
+{% block heading %}Import{% endblock %}
+{% block content %}
+{% if result %}
+  <section class="card preview" aria-labelledby="preview-title">
+    <div class="card-head">
+      <h2 class="card-title" id="preview-title">Preview · {{ pending.file_name }} → {{ pending.account_label }}</h2>
+      <span class="chip">{{ result.importer }}</span>
+    </div>
+    {% if result.already_imported %}
+      <p class="msg msg-warning">This exact file was imported on {{ result.already_imported.imported_at|date:"j M Y H:i" }}. Importing again only adds rows that are not there yet.</p>
+    {% endif %}
+    <div class="stats">
+      <div><span class="stat-label">Rows</span><span class="stat-value num">{{ result.rows|length }}</span></div>
+      <div><span class="stat-label">New</span><span class="stat-value num accent">{{ result.new|length }}</span></div>
+      <div><span class="stat-label">Already imported</span><span class="stat-value num">{{ result.duplicates }}</span></div>
+      <div><span class="stat-label">Period</span><span class="stat-value num small">{{ result.first|date:"d.m.Y" }} – {{ result.last|date:"d.m.Y" }}</span></div>
+      <div><span class="stat-label">Money in</span><span class="stat-value num pos">{{ result.money_in|nok }}</span></div>
+      <div><span class="stat-label">Money out</span><span class="stat-value num neg">{{ result.money_out|nok }}</span></div>
+    </div>
+    <div class="table-wrap">
+      <table class="table">
+        <caption class="sr-only">Latest 20 rows in the file</caption>
+        <thead><tr><th>Date</th><th>Description</th><th class="right">Amount</th></tr></thead>
+        <tbody>
+        {% for r in result.sample %}
+          <tr><td class="num muted">{{ r.date|date:"d.m.Y" }}</td><td>{{ r.description }}</td>
+              <td class="num right {% if r.amount < 0 %}neg{% else %}pos{% endif %}">{{ r.amount|nok:2 }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <form method="post" action="{% url 'web:import_confirm' %}" class="actions">
+      {% csrf_token %}
+      <input type="hidden" name="sha" value="{{ pending.sha }}">
+      <input type="hidden" name="file_name" value="{{ pending.file_name }}">
+      <input type="hidden" name="account_id" value="{{ pending.account_id }}">
+      <input type="hidden" name="new_account_name" value="{{ pending.new_account_name }}">
+      <input type="hidden" name="bank" value="{{ pending.bank }}">
+      <button class="btn btn-primary" type="submit" {% if not result.new %}disabled{% endif %}>
+        Import {{ result.new|length }} transaction{{ result.new|length|pluralize }}</button>
+      <a class="btn" href="{% url 'web:import' %}">Cancel</a>
+    </form>
+  </section>
+{% endif %}
+
+<section class="grid grid-2-1">
+  <form class="card form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <h2 class="card-title">Upload a bank export</h2>
+    {% if form.non_field_errors %}<p class="msg msg-error">{{ form.non_field_errors|join:" " }}</p>{% endif %}
+    <label class="dropzone" data-dropzone>
+      {% include "web/icon.html" with name="upload" %}
+      <span><strong data-filename>Drop a CSV or Excel file here</strong><br><span class="muted">or click to choose · one file per account</span></span>
+      <input type="file" name="file" accept=".csv,.txt,.xlsx,text/csv" required>
+    </label>
+    {% if form.file.errors %}<p class="msg msg-error">{{ form.file.errors|join:" " }}</p>{% endif %}
+    <div class="field">
+      <label for="id_account">Account</label>
+      <select id="id_account" name="account" data-account-select="new-account">
+        <option value="">New account…</option>
+        {% for a in form.fields.account.queryset %}
+          <option value="{{ a.pk }}" {% if form.account.value|stringformat:"s" == a.pk|stringformat:"s" %}selected{% endif %}>{{ a.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="field-row" id="new-account">
+      <div class="field"><label for="id_new_account_name">New account name</label>
+        <input id="id_new_account_name" name="new_account_name" value="{{ form.new_account_name.value|default:'' }}" placeholder="e.g. Everyday account"></div>
+      <div class="field"><label for="id_bank">Bank</label>
+        <input id="id_bank" name="bank" value="{{ form.bank.value|default:'' }}" placeholder="e.g. DNB"></div>
+    </div>
+    <div class="actions"><button class="btn btn-primary" type="submit">Preview</button>
+      <span class="muted">Nothing is saved until you confirm.</span></div>
+  </form>
+
+  <section class="card">
+    <h2 class="card-title">Previous imports</h2>
+    {% if batches %}
+      <ul class="list">
+      {% for b in batches %}
+        <li>
+          <div><strong>{{ b.file_name }}</strong><br>
+            <span class="muted">{{ b.account }} · {{ b.imported_at|date:"j M Y H:i" }} · {{ b.rows_imported }} new{% if b.rows_duplicate %}, {{ b.rows_duplicate }} skipped{% endif %}</span></div>
+          <form method="post" action="{% url 'web:import_undo' b.pk %}"
+                data-confirm="Remove the {{ b.rows_imported }} transactions this import added?">
+            {% csrf_token %}<button class="btn btn-ghost" type="submit">Undo</button>
+          </form>
+        </li>
+      {% endfor %}
+      </ul>
+    {% else %}
+      <p class="muted">No imports yet.</p>
+    {% endif %}
+  </section>
+</section>
+{% endblock %}

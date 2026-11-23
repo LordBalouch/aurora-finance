@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Dashboard · Aurora{% endblock %}
+{% block heading %}Dashboard{% endblock %}
+{% block toolbar %}
+  <nav class="segmented" aria-label="Period">
+    {% for key, name, active in periods %}<a href="?period={{ key }}"{% if active %} aria-current="true"{% endif %}>{{ name }}</a>{% endfor %}
+  </nav>
+  <a class="btn btn-primary" href="{% url 'web:import' %}">{% include "web/icon.html" with name="upload" %}Import</a>
+{% endblock %}
+{% block content %}
+  {% if is_sample %}
+  <section class="banner">
+    <span class="chip chip-sample">Sample data</span>
+    <p><strong>This is a preview with made-up numbers.</strong> Import a bank file to see your own.</p>
+    <a class="btn" href="{% url 'web:import' %}">Import a file</a>
+  </section>
+  {% endif %}
+
+  <section class="grid grid-kpi" aria-label="Key figures, {{ latest_month }}">
+    {% for k in kpis %}{% with spark_id="spark-"|add:k.key %}{% include "web/kpi.html" %}{% endwith %}{% endfor %}
+  </section>
+
+  <section class="grid grid-2-1">
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Income and spending · {{ span }}</h2></div>
+      <p class="card-insight">{{ trend_insight }}</p>
+      <div class="chart" data-chart="trend" role="img" aria-label="Monthly income and spending, {{ span }}"></div>
+      {{ trend|json_script:"trend" }}
+      {% include "web/_ai.html" with card="overview" %}
+    </article>
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Spending by group · {{ span }}</h2></div>
+      <p class="card-insight">{{ category_insight }}</p>
+      <div class="chart chart-sm" data-chart="categories" role="img" aria-label="Spending by category group, {{ span }}"></div>
+      {{ categories|json_script:"categories" }}
+    </article>
+  </section>
+{% if not is_sample %}
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">The story of {{ latest_month }}</h2></div>
+    <p class="kpi-sub">A short story of the last complete month, written by AI from your numbers.</p>
+    {% include "web/_ai.html" with card="month_story" %}
+  </section>
+  <section class="grid grid-3" aria-label="This month, recurring payments and unusual months">
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">This month · forecast</h2></div>
+      {% if forecast %}
+        <p class="kpi-value num">{{ forecast.forecast|nok }}</p>
+        <p class="kpi-sub">Spent {{ forecast.spent|nok }} so far · {{ forecast.recurring_left|nok }} in recurring payments still due · about {{ forecast.other_left|nok }} more in {{ forecast.days_left }} days.{% if forecast.typical %} A usual month: {{ forecast.typical|nok }}.{% endif %}</p>
+      {% else %}
+        <p class="card-insight">Your data ends {{ data_until|date:"j F Y" }}.</p>
+        <p class="kpi-sub">Import this month's statements to see where the month is heading.</p>
+        <p><a class="btn" href="{% url 'web:import' %}">Import</a></p>
+      {% endif %}
+    </article>
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Recurring payments</h2></div>
+      <p class="kpi-value num">{{ recurring_total|nok }}<span class="kpi-sub"> / month</span></p>
+      <p class="kpi-sub">{{ recurring_count }} active{% if price_rises %} · {{ price_rises }} went up in price{% endif %}.</p>
+      <p><a class="btn" href="{% url 'web:insights' %}#recurring">See all</a></p>
+    </article>
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Unusual months</h2></div>
+      {% if top_anomalies %}
+      <ul class="list">
+        {% for a in top_anomalies %}<li><a href="{{ a.url }}"><span>{{ a.text }}</span><span class="num">{{ a.amount|nok }} <span class="muted">vs. {{ a.typical|nok }}</span></span></a></li>{% endfor %}
+      </ul>
+      {% else %}<p class="kpi-sub">Nothing unusual in the last three months.</p>{% endif %}
+    </article>
+  </section>
+  {% endif %}
+
+  {% if netted %}
+  <section class="card" aria-label="Not counted as income or spending">
+    <div class="card-head"><h2 class="card-title">Outside income and spending · {{ span }}</h2></div>
+    <table class="table">
+      <thead><tr><th>Category</th><th class="right">In</th><th class="right">Out</th><th class="right">Net</th></tr></thead>
+      <tbody>
+        {% for n in netted %}<tr><td>{{ n.name }}</td><td class="num right">{{ n.money_in|nok }}</td><td class="num right">{{ n.money_out|nok }}</td><td class="num right">{{ n.net|nok }}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+    <p class="note">Gifts, shared bills and paying back between people. Not counted in the figures above.</p>
+  </section>
+  {% endif %}
+{% endblock %}

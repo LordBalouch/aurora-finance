@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Budget · Aurora{% endblock %}
+{% block heading %}Budget{% endblock %}
+{% block toolbar %}
+  <nav class="segmented" aria-label="Month">
+    <a href="?month={{ prev }}" aria-label="Previous month">‹</a>
+    <a aria-current="true">{{ month_label }}</a>
+    <a href="?month={{ next }}" aria-label="Next month">›</a>
+  </nav>
+{% endblock %}
+{% block content %}
+  {% if note %}<p class="msg msg-warning">{{ note }}</p>{% endif %}
+
+  {% if not has_budget %}
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">No budget for {{ month_label }} yet</h2></div>
+    {% if suggestion %}
+      <p class="card-insight">Suggested from your last 6 months (median per group, rounded up to 100 kr): {{ suggestion.values|length }} groups.</p>
+      <ul class="chips">{% for g, v in suggestion.items %}<li class="chip">{{ g }} {{ v|nok }}</li>{% endfor %}</ul>
+    {% endif %}
+    <div class="actions">
+      <form method="post" action="{% url 'web:budget_create' %}">{% csrf_token %}<input type="hidden" name="month" value="{{ month }}">
+        <input type="hidden" name="source" value="history"><button class="btn btn-primary" type="submit">Create from history</button></form>
+      {% if has_previous %}<form method="post" action="{% url 'web:budget_create' %}">{% csrf_token %}<input type="hidden" name="month" value="{{ month }}">
+        <input type="hidden" name="source" value="previous"><button class="btn" type="submit">Copy last month</button></form>{% endif %}
+    </div>
+  </section>
+  {% else %}
+  <section class="grid grid-kpi" aria-label="Budget summary">
+    <article class="card kpi"><span class="kpi-label">Budget</span><span class="kpi-value num">{{ total_budget|nok }}</span><span class="kpi-sub">{{ month_label }}</span></article>
+    <article class="card kpi"><span class="kpi-label">Spent</span><span class="kpi-value num">{{ total_spent|nok }}</span><span class="kpi-sub">so far</span></article>
+    <article class="card kpi"><span class="kpi-label">Forecast</span><span class="kpi-value num">{{ total_forecast|nok }}</span><span class="kpi-sub">end of month</span></article>
+    <article class="card kpi"><span class="kpi-label">Groups</span><span class="kpi-value num">{{ rows|length }}</span>
+      <span class="kpi-sub">{% for s, n in counts.items %}{{ n }} {{ s }}{% if not forloop.last %} · {% endif %}{% endfor %}</span></article>
+  </section>
+
+  <section class="grid grid-2-1">
+    <article class="card table-card">
+      <div class="card-head pad"><h2 class="card-title">Per group</h2><span class="muted">The line in each bar is where you would be at an even pace. Change an amount and save.</span></div>
+      <form method="post" action="{% url 'web:budget_save' %}">
+        {% csrf_token %}<input type="hidden" name="month" value="{{ month }}">
+        <div class="table-wrap"><table class="table budget-table">
+          <thead><tr><th>Group</th><th class="right">Budget</th><th>Progress</th><th class="right">Spent</th><th class="right">Forecast</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for r in rows %}
+            <tr>
+              <td><a href="{{ r.url }}">{{ r.group }}</a></td>
+              <td class="right"><input class="amount" name="amount_{{ r.pk }}" value="{{ r.budget|floatformat:0 }}" inputmode="numeric" aria-label="Budget for {{ r.group }}" data-group="{{ r.group }}"></td>
+              <td><div class="bar status-{{ r.status|slugify }}" role="img" aria-label="{{ r.spent|floatformat:0 }} of {{ r.budget|floatformat:0 }} kr"><span style="width: {{ r.fill|floatformat:0 }}%"></span><i style="left: {{ r.marker|floatformat:0 }}%"></i></div></td>
+              <td class="num right nowrap">{{ r.spent|nok }}</td>
+              <td class="num right nowrap">{{ r.forecast|nok }}</td>
+              <td class="nowrap"><span class="status status-{{ r.status|slugify }}"><span aria-hidden="true">{% if r.status == "on track" %}✓{% elif r.status == "at risk" %}!{% else %}✕{% endif %}</span> {{ r.status }}</span></td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table></div>
+        <div class="actions pad"><button class="btn btn-primary" type="submit">Save budget</button><span class="muted">Empty an amount to remove the group.</span></div>
+      </form>
+    </article>
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Spending through the month</h2></div>
+      <p class="card-insight">Cumulative spending in budgeted groups against an even pace.</p>
+      <div class="chart" data-chart="burndown" role="img" aria-label="Cumulative spending by day against the budget pace"></div>
+      {{ burndown|json_script:"burndown" }}
+      {% include "web/_ai.html" with card="budget" month=month %}
+    </article>
+  </section>
+  {% endif %}
+
+  {% if year_view %}
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">Budget vs. actual · % of budget</h2></div>
+    <p class="card-insight">Blue is under budget, orange over. 100 % is exactly on budget.</p>
+    <div class="chart" data-chart="year_view" role="img" aria-label="Spending as percent of budget per group and month"></div>
+    {{ year_view|json_script:"year_view" }}
+  </section>
+  {% endif %}
+
+  <section class="card" id="goals">
+    <div class="card-head"><h2 class="card-title">Savings goals</h2></div>
+    {% if goals %}
+    <ul class="list goals">
+      {% for g in goals %}
+      <li>
+        <div class="goal-main">
+          <strong>{{ g.goal.name }}</strong>
+          <span class="muted num">{{ g.goal.saved|nok }} of {{ g.goal.target_amount|nok }}{% if g.goal.monthly %} · {{ g.goal.monthly|nok }}/month{% endif %}</span>
+          <div class="bar status-on-track"><span style="width: {{ g.share|floatformat:0 }}%"></span></div>
+        </div>
+        <div class="goal-side">
+          {% if g.months == 0 %}<span class="status status-on-track">✓ reached</span>
+          {% elif g.date %}<span class="num">{{ g.date|date:"M Y" }}</span><span class="muted">{{ g.months }} months{% if g.late %} · <span class="status status-at-risk">! after {{ g.goal.target_date|date:"M Y" }}</span>{% endif %}</span>
+          {% else %}<span class="muted">Set a monthly amount to see when</span>{% endif %}
+          <form method="post" action="{% url 'web:goal_delete' g.goal.pk %}" data-confirm="Remove this goal?">{% csrf_token %}<button class="btn btn-ghost" type="submit">Remove</button></form>
+        </div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="kpi-sub">No goals yet. A buffer of three months' fixed costs is a common first goal.</p>{% endif %}
+    <form method="post" action="{% url 'web:goal_add' %}" class="goal-form">
+      {% csrf_token %}
+      {% with form=goal_form %}{% include "web/_form_fields.html" %}{% endwith %}
+      <button class="btn" type="submit">Add goal</button>
+    </form>
+  </section>
+{% endblock %}

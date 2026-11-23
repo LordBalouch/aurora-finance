@@ -1,0 +1,20 @@
+{% if error %}
+  <p class="msg msg-warning">{{ error }}</p>
+{% else %}
+  <div class="ai-box">
+    <p class="ai-summary">{{ advice.summary }}</p>
+    {% if advice.tips %}
+    <ol class="ai-tips">
+      {% for t in advice.tips %}<li><strong>{{ t.title }}</strong> {{ t.detail }}{% if t.numbers %}<span class="ai-numbers">{{ t.numbers }}</span>{% endif %}</li>{% endfor %}
+    </ol>
+    {% endif %}
+    <div class="ai-foot">
+      <span class="chip chip-ai">AI · {% if advice.cached %}saved answer from {{ advice.created_at|date:"j M H:i" }}{% else %}new answer{% endif %}</span>
+      <details><summary>What the AI saw</summary><pre>{{ advice.facts }}</pre></details>
+      <form hx-post="{% url 'web:ai_ask' card %}" hx-target="closest .ai-answer" hx-swap="innerHTML">
+        <input type="hidden" name="refresh" value="1"><button class="btn btn-ghost" type="submit">Ask again</button>
+      </form>
+    </div>
+    <p class="note">AI can be wrong. The numbers come from your data; the advice does not replace an accountant.</p>
+  </div>
+{% endif %}

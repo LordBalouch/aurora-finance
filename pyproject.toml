@@ -1,0 +1,11 @@
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+
+[tool.ruff.lint.per-file-ignores]
+# The notebook must call django.setup() before importing app code.
+"notebooks/*.ipynb" = ["E402"]

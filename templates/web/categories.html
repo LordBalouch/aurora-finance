@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Categories · Aurora{% endblock %}
+{% block heading %}Categories{% endblock %}
+{% block content %}
+<section class="stats stats-inline">
+  <div><span class="stat-label">Categorized</span><span class="stat-value num">{{ coverage.pct }} %</span></div>
+  <div><span class="stat-label">Of money out</span><span class="stat-value num">{{ coverage.money_pct }} %</span></div>
+  <div><span class="stat-label">Transactions</span><span class="stat-value num">{{ coverage.done }} / {{ coverage.total }}</span></div>
+  <div><span class="stat-label">Groups left</span><span class="stat-value num accent">{{ groups }}</span></div>
+</section>
+
+<section class="card table-card">
+  <div class="card-head pad"><h2 class="card-title">Inbox · not categorized yet</h2>
+    <span class="muted">Biggest first. One choice covers every transaction from that merchant or person.</span></div>
+  {% if inbox %}
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Merchant / person</th><th class="right">Count</th><th class="right">Total</th><th>Period</th><th>Category</th></tr></thead>
+      <tbody>
+      {% for g in inbox %}
+        <tr>
+          <td><span class="desc">{{ g.merchant }} <span class="chip">{% if g.sign == "in" %}money in{% else %}money out{% endif %}</span></span><span class="raw">{{ g.sample }}</span></td>
+          <td class="num right">{{ g.n }}</td>
+          <td class="num right nowrap {% if g.total < 0 %}neg{% else %}pos{% endif %}">{{ g.total|nok }}</td>
+          <td class="num muted nowrap">{{ g.first|date:"m.y" }}{% if g.first != g.last %}–{{ g.last|date:"m.y" }}{% endif %}</td>
+          <td>
+            <form class="inline-form" hx-post="{% url 'web:assign' %}" hx-target="closest tr" hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="merchant" value="{{ g.merchant }}"><input type="hidden" name="sign" value="{{ g.sign }}">
+              {% include "web/_category_select.html" %}
+              <button class="btn" type="submit">Apply</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if groups > inbox|length %}<p class="pad"><a class="btn" href="?all=1">Show all {{ groups }} groups</a></p>{% endif %}
+  {% else %}
+  <div class="empty"><h2>All done</h2><p class="muted">Every transaction has a category.</p></div>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2 class="card-title">By category · all time</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Category</th><th>Type</th><th class="right">Count</th><th class="right">Total</th></tr></thead>
+      <tbody>
+      {% for r in summary %}
+        <tr><td><span class="muted">{{ r.category__parent__name }} ›</span> {{ r.category__name }}</td>
+          <td class="muted">{{ r.category__kind }}</td>
+          <td class="num right">{{ r.n }}</td>
+          <td class="num right nowrap {% if r.total < 0 %}neg{% else %}pos{% endif %}">{{ r.total|nok }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

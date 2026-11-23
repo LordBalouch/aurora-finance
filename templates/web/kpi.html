@@ -1,0 +1,18 @@
+{% load money %}
+<article class="card kpi">
+  <span class="kpi-label">{{ k.label }}</span>
+  <span class="kpi-value num"{% if k.money %} data-countup="{{ k.value|floatformat:0|cut:',' }}"{% endif %}>
+    {% if k.money %}{{ k.value|nok }}{% elif k.value is None %}—{% else %}{{ k.value }} %{% endif %}
+  </span>
+  <span class="kpi-sub">{{ latest_month }}{% if k.average is not None %} · 12-mo avg {% if k.money %}{{ k.average|nok }}{% else %}{{ k.average }} %{% endif %}{% endif %}</span>
+  <div class="kpi-foot">
+    {% if k.delta %}
+      <span class="delta {% if k.delta.flat %}neutral{% elif k.delta.good %}good{% else %}bad{% endif %}">
+        <span aria-hidden="true">{% if k.delta.flat %}={% elif k.delta.up %}▲{% else %}▼{% endif %}</span>
+        <span class="sr-only">{% if k.delta.flat %}unchanged{% elif k.delta.up %}up{% else %}down{% endif %}</span>{% if k.delta.unit == "kr" %}{{ k.delta.value|nok }}{% else %}{{ k.delta.value|floatformat:1 }} {{ k.delta.unit }}{% endif %}
+      </span>
+    {% else %}<span class="delta-note">No previous month</span>{% endif %}
+    <div class="spark" data-chart="spark-{{ k.key }}" role="img" aria-label="{{ k.label }}, last 12 months"></div>
+    {{ k.spark|json_script:spark_id }}
+  </div>
+</article>

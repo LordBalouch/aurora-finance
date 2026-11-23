@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{% if instance %}{{ instance.year }}{% else %}New year{% endif %} · Aurora{% endblock %}
+{% block heading %}{% if instance %}Edit {{ instance.year }}{% else %}Add a tax year{% endif %}{% endblock %}
+{% block content %}
+<section class="card">
+  <p class="card-insight">Copy the figures from your tax settlement (Skatteoppgjør) at skatteetaten.no. The grey text under each field names the line to look for. Leave a field empty if it is not on your settlement.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% include "web/_form_fields.html" %}
+    <div class="actions"><button class="btn btn-primary" type="submit">Save</button> <a class="btn" href="{% url 'web:years' %}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Transactions · Aurora{% endblock %}
+{% block heading %}Transactions{% endblock %}
+{% block toolbar %}<a class="btn btn-primary" href="{% url 'web:import' %}">{% include "web/icon.html" with name="upload" %}Import</a>{% endblock %}
+{% block content %}
+<form class="card filters" hx-get="{% url 'web:transactions' %}" hx-target="#results" hx-push-url="true"
+      hx-trigger="input changed delay:300ms from:input[type=search], change">
+  <div class="field grow"><label for="q">Search</label>
+    <input id="q" type="search" name="q" value="{{ q }}" placeholder="Merchant or text  ( / )" data-search autocomplete="off"></div>
+  <div class="field"><label for="account">Account</label>
+    <select id="account" name="account">
+      <option value="">All accounts</option>
+      {% for a in accounts %}<option value="{{ a.pk }}" {% if account == a.pk|stringformat:"s" %}selected{% endif %}>{{ a.name }}</option>{% endfor %}
+    </select></div>
+  <div class="field"><label for="category">Category</label>
+    <select id="category" name="category">
+      <option value="">All categories</option>
+      <option value="none" {% if category == "none" %}selected{% endif %}>Uncategorized</option>
+      {% for parent, children in choices %}<optgroup label="{{ parent }}">{% for c in children %}<option value="{{ c.pk }}" {% if category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</optgroup>{% endfor %}
+    </select></div>
+  <div class="field"><label for="from">From</label><input id="from" type="date" name="from" value="{{ start|date:'Y-m-d' }}"></div>
+  <div class="field"><label for="to">To</label><input id="to" type="date" name="to" value="{{ end|date:'Y-m-d' }}"></div>
+  <noscript><button class="btn" type="submit">Filter</button></noscript>
+</form>
+<div id="results" class="stack">{% include "web/_transaction_results.html" %}</div>
+{% endblock %}

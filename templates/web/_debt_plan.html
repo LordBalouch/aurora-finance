@@ -1,0 +1,17 @@
+{% load money %}
+<div id="debt-plan">
+  {% if base %}
+    {% if base.months %}
+      <p class="card-insight">At the current pace you are debt-free in <strong>{{ base.months }} months</strong> ({% widthratio base.months 12 1 %} years) and pay about {{ base.interest|nok }} in interest.
+      {% if faster.months %}With {{ extra }} kr more a month: <strong>{{ faster.months }} months</strong>, {{ saved_months }} months sooner, {{ saved_interest|nok }} less interest.{% endif %}</p>
+    {% else %}
+      <p class="card-insight">At the current payments the debt is never paid off: the payments do not cover the interest.</p>
+    {% endif %}
+    {% if chart %}
+      <div class="chart" data-chart="debt_chart" role="img" aria-label="Debt left month by month"></div>
+      {{ chart|json_script:"debt_chart" }}
+    {% endif %}
+  {% else %}
+    <p class="card-insight">Add a tax year or a loan balance to see a payoff plan.</p>
+  {% endif %}
+</div>

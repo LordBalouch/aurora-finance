@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Trends · Aurora{% endblock %}
+{% block heading %}Trends{% endblock %}
+{% block toolbar %}
+  <nav class="segmented" aria-label="Period">
+    {% for key, name, active in periods %}<a href="?period={{ key }}"{% if active %} aria-current="true"{% endif %}>{{ name }}</a>{% endfor %}
+  </nav>
+{% endblock %}
+{% block content %}
+  {% if not has_data %}
+  <section class="banner">
+    <p><strong>No data yet.</strong> Import a bank file to see how your spending develops.</p>
+    <a class="btn" href="{% url 'web:import' %}">Import a file</a>
+  </section>
+  {% else %}
+  <section class="grid grid-2-1">
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Spending per group · {{ span }}</h2></div>
+      <p class="card-insight">{{ stack_insight }}</p>
+      <div class="chart" data-chart="stacked" role="img" aria-label="Monthly spending stacked by category group, {{ span }}"></div>
+      {{ stacked|json_script:"stacked" }}
+      {% include "web/_ai.html" with card="trends" %}
+    </article>
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Fixed and variable · {{ span }}</h2></div>
+      <p class="card-insight">{{ fixed_insight }}</p>
+      <div class="chart" data-chart="split" role="img" aria-label="Monthly fixed and variable costs, {{ span }}"></div>
+      {{ split|json_script:"split" }}
+    </article>
+  </section>
+
+  <section aria-label="Each group on the same scale">
+    <div class="card-head"><h2 class="card-title">Each group · same scale · change = last 3 months vs. the 3 before</h2></div>
+    <div class="grid grid-multiples">
+      {% for g in multiples %}
+      <article class="card multiple">
+        <span class="kpi-label">{{ g.name }}</span>
+        <span class="num">{{ g.total|nok }}</span>
+        <span class="kpi-sub">{{ g.average|nok }} / month{% if g.change is not None %} ·
+          <span class="delta {% if g.change > 0 %}bad{% else %}good{% endif %}"><span aria-hidden="true">{% if g.change > 0 %}▲{% else %}▼{% endif %}</span><span class="sr-only">{% if g.change > 0 %}up{% else %}down{% endif %}</span>{{ g.change|stringformat:"+d"|cut:"+"|cut:"-" }} %</span>{% endif %}</span>
+        <div class="spark" data-chart="{{ g.key }}" role="img" aria-label="{{ g.name }} per month"></div>
+        {{ g.spark|json_script:g.key }}
+      </article>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+{% endblock %}

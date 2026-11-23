@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Add a balance · Aurora{% endblock %}
+{% block heading %}Add a loan balance{% endblock %}
+{% block content %}
+<section class="card">
+  <p class="card-insight">One loan or credit on one date, for example from gjeldsregisteret.no or the lender's statement. With balances per lender, the payoff plan works per loan.</p>
+  <form method="post">
+    {% csrf_token %}
+    {% include "web/_form_fields.html" %}
+    <div class="actions"><button class="btn btn-primary" type="submit">Save</button> <a class="btn" href="{% url 'web:debt' %}">Cancel</a></div>
+  </form>
+</section>
+{% endblock %}

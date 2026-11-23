@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Years · Aurora{% endblock %}
+{% block heading %}Years{% endblock %}
+{% block toolbar %}<a class="btn btn-primary" href="{% url 'web:year_new' %}">Add a year</a>{% endblock %}
+{% block content %}
+  {% if not has_data %}
+  <section class="banner">
+    <p><strong>No tax years yet.</strong> Add the key figures from your tax settlement to compare years: income, interest, tax, wealth and debt.</p>
+    <a class="btn" href="{% url 'web:year_new' %}">Add a year</a>
+  </section>
+  {% else %}
+  <p class="card-insight">{{ insight }}</p>
+      {% include "web/_ai.html" with card="years" %}
+  <section class="grid grid-2">
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Income, interest and tax</h2></div>
+      <div class="chart" data-chart="income_chart" role="img" aria-label="Income, interest paid and tax per year"></div>
+      {{ income_chart|json_script:"income_chart" }}
+    </article>
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Wealth and debt at 31 December</h2></div>
+      <div class="chart" data-chart="wealth_chart" role="img" aria-label="Gross wealth, debt and net wealth per year"></div>
+      {{ wealth_chart|json_script:"wealth_chart" }}
+    </article>
+  </section>
+  <section class="card table-card">
+    <div class="card-head pad"><h2 class="card-title">From the tax settlements</h2><span class="muted">Click a year to edit it.</span></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th></th>{% for y in years %}<th class="right"><a href="{% url 'web:year_edit' y %}">{{ y }}</a></th>{% endfor %}<th class="right">Change</th></tr></thead>
+        <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>{{ r.label }}</td>
+            {% for c in r.cells %}<td class="num right nowrap">{% if c is None %}<span class="muted">—</span>{% elif r.rate %}{{ c|floatformat:1 }} %{% else %}{{ c|nok }}{% endif %}</td>{% endfor %}
+            <td class="right">{% if r.change %}<span class="delta {% if r.change.good is None %}neutral{% elif r.change.good %}good{% else %}bad{% endif %}"><span aria-hidden="true">{% if r.change.up %}▲{% else %}▼{% endif %}</span><span class="sr-only">{% if r.change.up %}up{% else %}down{% endif %}</span></span>{% endif %}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% for year, note in notes %}<p class="note"><strong>{{ year }}:</strong> {{ note }}</p>{% endfor %}
+  {% endif %}
+{% endblock %}

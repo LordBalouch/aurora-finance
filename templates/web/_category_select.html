@@ -1,0 +1,4 @@
+<select name="category" required aria-label="Category">
+  <option value="">Choose…</option>
+  {% for parent, children in choices %}<optgroup label="{{ parent }}">{% for c in children %}<option value="{{ c.pk }}"{% if c.pk == selected %} selected{% endif %}>{{ c.name }}</option>{% endfor %}</optgroup>{% endfor %}
+</select>

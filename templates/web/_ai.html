@@ -1,0 +1,13 @@
+{# Usage: {% include "web/_ai.html" with card="overview" %} — optional: month #}
+<div class="ai" id="ai-{{ card }}">
+  {% if ai_available %}
+  <form hx-post="{% url 'web:ai_ask' card %}" hx-target="#ai-{{ card }}-answer" hx-swap="innerHTML" hx-indicator="#ai-{{ card }}">
+    {% if month %}<input type="hidden" name="month" value="{{ month }}">{% endif %}
+    <button class="btn btn-ai" type="submit"><span aria-hidden="true">✦</span> Ask AI</button>
+    <span class="ai-wait muted">Thinking…</span>
+  </form>
+  {% else %}
+  <button class="btn btn-ai" type="button" disabled title="Add ANTHROPIC_API_KEY to .env to turn on AI tips"><span aria-hidden="true">✦</span> Ask AI</button>
+  {% endif %}
+  <div id="ai-{{ card }}-answer" class="ai-answer" aria-live="polite"></div>
+</div>

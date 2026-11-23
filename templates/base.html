@@ -1,0 +1,58 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Aurora{% endblock %}</title>
+  <link rel="preload" href="{% static 'fonts/inter.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/echarts.min.js' %}" defer></script>
+  <script src="{% static 'js/charts.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+</head>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<div class="shell">
+  <aside class="sidebar">
+    <a class="brand" href="{% url 'web:dashboard' %}"><span class="brand-mark" aria-hidden="true"></span>Aurora</a>
+    <nav class="nav" aria-label="Main">
+      <div class="nav-label">Overview</div>
+      {% with p=request.resolver_match.url_name %}
+      <a href="{% url 'web:dashboard' %}" {% if p == 'dashboard' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="dashboard" %}Dashboard</a>
+      <a href="{% url 'web:trends' %}" {% if p == 'trends' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="trend" %}Trends</a>
+      <a href="{% url 'web:insights' %}" {% if p == 'insights' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="spark" %}Insights</a>
+      <a href="{% url 'web:transactions' %}" {% if p == 'transactions' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="list" %}Transactions</a>
+      <a href="{% url 'web:import' %}" {% if p == 'import' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="upload" %}Import</a>
+      <a href="{% url 'web:categories' %}" {% if p == 'categories' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="tag" %}Categories</a>
+      {% endwith %}
+
+      <div class="nav-label">Plan</div>
+      {% with p=request.resolver_match.url_name %}
+      <a href="{% url 'web:years' %}" {% if p == 'years' or p == 'year_new' or p == 'year_edit' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="calendar" %}Years</a>
+      <a href="{% url 'web:debt' %}" {% if p == 'debt' or p == 'debt_add' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="debt" %}Debt</a>
+      <a href="{% url 'web:budget' %}" {% if p == 'budget' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="target" %}Budget</a>
+      {% endwith %}
+    </nav>
+  </aside>
+  <div class="main">
+    <header class="topbar">
+      <h1>{% block heading %}{% endblock %}</h1>
+      {% block toolbar %}{% endblock %}
+    </header>
+    <main class="content">
+      {% if messages %}<div class="messages" role="status">{% for m in messages %}<p class="msg msg-{{ m.tags }}">{{ m }}</p>{% endfor %}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+</body>
+</html>

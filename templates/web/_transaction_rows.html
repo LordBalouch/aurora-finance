@@ -1,0 +1,8 @@
+{% load money %}{% for t in page.object_list %}
+<tr{% if forloop.last and page.has_next %} hx-get="{% url 'web:transactions' %}?{{ query }}{% if query %}&{% endif %}page={{ page.next_page_number }}" hx-trigger="revealed" hx-swap="afterend"{% endif %}>
+  <td class="num muted nowrap">{{ t.date|date:"d.m.Y" }}</td>
+  <td><span class="desc">{{ t.description_clean }}</span>{% if t.description_clean != t.description_raw %}<span class="raw">{{ t.description_raw }}</span>{% endif %}</td>
+  <td>{% if t.category %}<span class="cat-pill">{{ t.category.name }}</span>{% else %}<span class="cat-pill none">none</span>{% endif %}</td>
+  <td class="muted nowrap">{{ t.account.name }}</td>
+  <td class="num right nowrap {% if t.amount < 0 %}neg{% else %}pos{% endif %}">{{ t.amount|nok:2 }}</td>
+</tr>{% endfor %}

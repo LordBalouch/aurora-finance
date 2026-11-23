@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load money %}
+{% block title %}Insights · Aurora{% endblock %}
+{% block heading %}Insights{% endblock %}
+{% block toolbar %}
+  <nav class="segmented" aria-label="Period">
+    {% for key, name, active in periods %}<a href="?period={{ key }}"{% if active %} aria-current="true"{% endif %}>{{ name }}</a>{% endfor %}
+  </nav>
+{% endblock %}
+{% block content %}
+  {% if not has_data %}
+  <section class="banner">
+    <p><strong>No data yet.</strong> Import a bank file to see recurring payments, unusual months and patterns.</p>
+    <a class="btn" href="{% url 'web:import' %}">Import a file</a>
+  </section>
+  {% else %}
+  <section class="card table-card" id="recurring">
+    <div class="card-head pad"><h2 class="card-title">Recurring payments</h2>
+      <span class="muted">Paid at a regular interval and still active. Click a row for the payments.</span></div>
+    <p class="card-insight pad-x">{{ recurring|length }} recurring payments cost about {{ recurring_total|nok }} a month{% if price_rises %}; {{ price_rises }} went up in price{% endif %}.</p>
+      {% include "web/_ai.html" with card="recurring" %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Payment</th><th>Category</th><th>Every</th><th class="right">Amount</th><th class="right">Per month</th><th class="right">Last change</th><th>Next</th></tr></thead>
+        <tbody>
+        {% for r in recurring %}
+          <tr class="row-link" data-href="{{ r.url }}">
+            <td><a href="{{ r.url }}">{{ r.name }}</a></td>
+            <td class="muted">{{ r.category|default:"—" }}</td>
+            <td class="muted">{{ r.cadence }}</td>
+            <td class="num right nowrap">{{ r.amount|nok }}</td>
+            <td class="num right nowrap">{{ r.monthly|nok }}</td>
+            <td class="right nowrap">{% if r.price_change is not None %}<span class="delta {% if r.price_change > 0 %}bad{% else %}good{% endif %}"><span aria-hidden="true">{% if r.price_change > 0 %}▲{% else %}▼{% endif %}</span><span class="sr-only">{% if r.price_change > 0 %}up{% else %}down{% endif %}</span>{{ r.price_change|stringformat:".0f"|cut:"-" }} %</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+            <td class="num muted nowrap">{{ r.next|date:"d.m" }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="7" class="muted">No regular payments found yet. They need at least three payments.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="grid grid-2-1">
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Where the money went · {{ span }}</h2></div>
+      <p class="card-insight">{{ flow_insight }}</p>
+      <div class="chart chart-lg" data-chart="sankey" role="img" aria-label="Flow from money in to spending groups, {{ span }}"></div>
+      {{ sankey|json_script:"sankey" }}
+      {% include "web/_ai.html" with card="money_flow" %}
+    </article>
+    <article class="card" id="anomalies">
+      <div class="card-head"><h2 class="card-title">Unusual months · last 3 months</h2></div>
+      <p class="card-insight">{% if anomalies %}Compared with each group's own last 12 months.{% else %}Nothing unusual: every group stayed close to its usual level.{% endif %}</p>
+      {% include "web/_ai.html" with card="anomalies" %}
+      <ul class="list">
+        {% for a in anomalies %}
+        <li><a href="{{ a.url }}">
+          <span><strong>{{ a.group }}</strong> · {{ a.month }}</span>
+          <span class="num">{{ a.amount|nok }} <span class="muted">vs. usual {{ a.typical|nok }}</span>
+            <span class="delta {% if a.up %}bad{% else %}good{% endif %}"><span aria-hidden="true">{% if a.up %}▲{% else %}▼{% endif %}</span><span class="sr-only">{% if a.up %}up{% else %}down{% endif %}</span>{{ a.difference|nok|cut:"−" }}</span></span>
+        </a></li>
+        {% endfor %}
+      </ul>
+    </article>
+  </section>
+
+  <section class="grid grid-2-1">
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">Everyday spending per day · weekday × month</h2></div>
+      <p class="card-insight">{{ busiest_weekday }} is the most expensive weekday on average. Fixed bills are left out.</p>
+      <div class="chart" data-chart="heatmap" role="img" aria-label="Average variable spending per day by weekday and month, {{ span }}"></div>
+      {{ heatmap|json_script:"heatmap" }}
+    </article>
+    <article class="card">
+      <div class="card-head"><h2 class="card-title">By day of the month</h2></div>
+      <p class="card-insight">Average everyday spending on each date.</p>
+      <div class="chart" data-chart="days" role="img" aria-label="Average variable spending by day of the month, {{ span }}"></div>
+      {{ days|json_script:"days" }}
+    </article>
+  </section>
+
+  <section class="card table-card">
+    <div class="card-head pad"><h2 class="card-title">Top merchants · {{ span }}</h2>
+      <span class="muted">Net spending; click a row for the payments.</span></div>
+    <div class="table-wrap">
+      <table class="table">
+        <thead><tr><th>Merchant</th><th>Group</th><th class="right">Payments</th><th class="right">Total</th><th class="right">Average</th><th class="right">Share</th></tr></thead>
+        <tbody>
+        {% for m in merchants %}
+          <tr class="row-link" data-href="{{ m.url }}">
+            <td><a href="{{ m.url }}">{{ m.merchant }}</a></td>
+            <td class="muted">{{ m.group|default:"—" }}</td>
+            <td class="num right">{{ m.count }}</td>
+            <td class="num right nowrap">{{ m.total|nok }}</td>
+            <td class="num right nowrap">{{ m.average|nok }}</td>
+            <td class="num right">{{ m.share }} %</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+{% endblock %}
