@@ -29,7 +29,11 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
       opens the browser (evaluate Briefcase, PyInstaller or a small Tauri shell). Signing
       needs an Apple Developer account (99 USD/year); without it macOS warns on first start.
 - [x] 7.6 First-run guide: pick a data folder, import a first file, choose AI or no AI.
-- [ ] 7.7 Norwegian UI (Django i18n), with English kept.
+- [ ] 7.7 Norwegian UI (Django i18n), with English kept. **Postponed (2026-11-24):** about
+      500 strings in templates, views and chart labels, plus month names from `strftime`
+      that must move to Django's date filters. A half-translated UI is worse than an English
+      one, so it is a piece of its own. The AI already answers in Norwegian. Do it before
+      the app is offered to Norwegian users who are not developers.
 - [x] 7.8 Backup and move: export and import the whole database as one file.
 
 ## 7.1/7.2 as built (2026-11-24)
