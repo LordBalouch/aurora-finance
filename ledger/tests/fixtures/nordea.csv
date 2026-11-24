@@ -1,0 +1,4 @@
+Bokføringsdato;Beløp;Avsender;Mottaker;Navn;Tittel;Valuta;Betalingstype
+2026/10/30;-249,00;12345678903;;Kiwi Storo;KIWI 505 STORO;NOK;Varekjøp
+Reservert;-120,00;12345678903;;Narvesen;NARVESEN OSLO S;NOK;Varekjøp
+2026/10/25;38 500,00;;12345678903;Nordlys Teknikk AS;Lønn;NOK;Overføring

@@ -15,11 +15,11 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
   best-effort import.
 
 ## Tasks
-- [ ] 7.1 Other banks: today one generic importer finds columns by name and is tested on DNB
+- [x] 7.1 Other banks: today one generic importer finds columns by name and is tested on DNB
       only. Collect the real export layouts of Nordea, SpareBank 1, Handelsbanken and
       Storebrand, add synonyms or a bank-specific importer where needed, and add a test
       fixture of synthetic rows for each format.
-- [ ] 7.2 "Teach a new bank": when no importer matches, the user picks the date, amount and
+- [x] 7.2 "Teach a new bank": when no importer matches, the user picks the date, amount and
       text columns once; the mapping is saved and reused.
 - [x] 7.3 Any AI: an "OpenAI-compatible" provider (base URL + key + model) next to Claude
       and Ollama. That covers OpenAI, Gemini, Mistral, LM Studio and most others.
@@ -31,6 +31,15 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
 - [ ] 7.6 First-run guide: pick a data folder, import a first file, choose AI or no AI.
 - [ ] 7.7 Norwegian UI (Django i18n), with English kept.
 - [x] 7.8 Backup and move: export and import the whole database as one file.
+
+## 7.1/7.2 as built (2026-11-24)
+- The generic importer now also knows the column names of Nordea, SpareBank 1, Bank
+  Norwegian and Revolut, dates with a time, and skips pending ("Reservert") rows. The test
+  fixtures are synthetic rows in each layout as far as we know it: **check with a real
+  export from each bank** before telling users it works.
+- Unknown columns open a step where the user picks date, text and amount (or in/out); the
+  choice is saved as a `BankFormat` for that header and used automatically next time. Saved
+  layouts are listed on the Import page and can be forgotten.
 
 ## Not planned
 - Mobile app. The web UI already works in a phone browser against your own machine; a

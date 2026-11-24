@@ -1,0 +1,3 @@
+Type,Product,Started Date,Completed Date,Description,Amount,Fee,Currency,State,Balance
+Card Payment,Current,2026-10-29 18:02:11,2026-10-30 09:14:55,Ruter,-42.00,0.00,NOK,COMPLETED,958.00
+Topup,Current,2026-10-01 10:00:00,2026-10-01 10:00:05,Top-up by *1234,1000.00,0.00,NOK,COMPLETED,1000.00

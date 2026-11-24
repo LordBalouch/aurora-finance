@@ -46,6 +46,43 @@
   </section>
 {% endif %}
 
+{% if mapping %}
+  <section class="card" aria-labelledby="map-title">
+    <div class="card-head"><h2 class="card-title" id="map-title">New file layout · {{ pending.file_name }}</h2></div>
+    <p class="card-insight">Aurora does not know these columns yet. Show it once which column is which; it remembers the choice for files with the same columns.</p>
+    {% if mapping.error %}<p class="msg msg-error">{{ mapping.error }}</p>{% endif %}
+    <div class="table-wrap">
+      <table class="table">
+        <caption class="sr-only">The first rows of the file</caption>
+        <thead><tr>{% for h in mapping.header %}<th>{{ h }}</th>{% endfor %}</tr></thead>
+        <tbody>{% for row in mapping.rows %}<tr>{% for c in row %}<td>{{ c }}</td>{% endfor %}</tr>{% endfor %}</tbody>
+      </table>
+    </div>
+    <form class="map-form" method="post" action="{% url 'web:import_map' %}">
+      {% csrf_token %}
+      <input type="hidden" name="sha" value="{{ pending.sha }}">
+      <input type="hidden" name="file_name" value="{{ pending.file_name }}">
+      <input type="hidden" name="account_id" value="{{ pending.account_id }}">
+      <input type="hidden" name="new_account_name" value="{{ pending.new_account_name }}">
+      <input type="hidden" name="bank" value="{{ pending.bank }}">
+      <div class="form-grid">
+        <div class="field"><label for="format_name">Name of this layout</label>
+          <input id="format_name" name="format_name" value="{{ mapping.name }}" placeholder="e.g. Nordea" maxlength="50"></div>
+        {% for field, label, chosen in mapping.fields %}
+        <div class="field"><label for="col_{{ field }}">{{ label }}</label>
+          <select id="col_{{ field }}" name="col_{{ field }}">
+            <option value="">—</option>
+            {% for h in mapping.header %}<option value="{{ h }}" {% if h == chosen %}selected{% endif %}>{{ h }}</option>{% endfor %}
+          </select></div>
+        {% endfor %}
+      </div>
+      <div class="actions"><button class="btn btn-primary" type="submit">Use these columns</button>
+        <a class="btn" href="{% url 'web:import' %}">Cancel</a>
+        <span class="muted">Pick either Amount, or both Money in and Money out.</span></div>
+    </form>
+  </section>
+{% endif %}
+
 <section class="grid grid-2-1">
   <form class="card form" method="post" enctype="multipart/form-data">
     {% csrf_token %}
@@ -93,6 +130,16 @@
       </ul>
     {% else %}
       <p class="muted">No imports yet.</p>
+    {% endif %}
+    {% if formats %}
+      <h3 class="card-subtitle">Your file layouts</h3>
+      <ul class="list">
+      {% for f in formats %}
+        <li><div><strong>{{ f.name }}</strong><br><span class="muted">{{ f.header|join:", " }}</span></div>
+          <form method="post" action="{% url 'web:format_delete' f.pk %}" data-confirm="Forget the column choice “{{ f.name }}”?">
+            {% csrf_token %}<button class="btn btn-ghost" type="submit">Forget</button></form></li>
+      {% endfor %}
+      </ul>
     {% endif %}
   </section>
 </section>
