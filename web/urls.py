@@ -42,5 +42,7 @@ urlpatterns = [
     path("settings/backup/", settings_page.download_backup, name="backup"),
     path("settings/restore/", settings_page.restore_backup, name="restore"),
     path("import/confirm/", imports.import_confirm, name="import_confirm"),
+    path("import/map/", imports.import_map, name="import_map"),
+    path("import/formats/<int:pk>/delete/", imports.format_delete, name="format_delete"),
     path("import/<int:pk>/undo/", imports.import_undo, name="import_undo"),
 ]

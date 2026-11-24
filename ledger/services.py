@@ -9,8 +9,8 @@ from django.db import transaction as db_transaction
 
 from .categorize import Matcher, RuleSpec, TxnView, merchant_key
 from .dedup import fingerprints
-from .importers import ParsedRow, detect, read_table
-from .models import Account, ImportBatch, Rule, Transaction
+from .importers import ImportFileError, MappedImporter, ParsedRow, detect, read_table
+from .models import Account, BankFormat, ImportBatch, Rule, Transaction
 from .normalize import clean_description
 
 
@@ -29,10 +29,39 @@ class Preview:
     sample: list[ParsedRow] = field(default_factory=list)
 
 
+def importer_for(header: list[str]):
+    """A saved column choice for exactly this header, else the built-in detection
+    (raises UnknownColumns when nothing fits)."""
+    saved = BankFormat.objects.filter(signature=BankFormat.signature_of(header)).first()
+    if saved:
+        mapped = MappedImporter(saved.name, saved.columns)
+        if mapped.matches(header):
+            return mapped
+    return detect(header)
+
+
+def teach_format(data: bytes, name: str, columns: dict[str, str]) -> BankFormat:
+    """Check that `columns` read every row of the file, then remember them for its header."""
+    header, rows = read_table(data)
+    importer = MappedImporter(name.strip() or "My bank", columns)
+    if not importer.matches(header):
+        raise ImportFileError(
+            "Choose a date column, a text column and either an amount column or both "
+            "money-in and money-out columns."
+        )
+    if not importer.parse(header, rows):
+        raise ImportFileError("No rows with an amount were found with these columns.")
+    fmt, _ = BankFormat.objects.update_or_create(
+        signature=BankFormat.signature_of(header),
+        defaults={"name": importer.name, "header": header, "columns": importer.columns},
+    )
+    return fmt
+
+
 def preview(data: bytes, account: Account | None) -> Preview:
     """Parse and compare with what the account already has. Writes nothing."""
     header, raw_rows = read_table(data)
-    importer = detect(header)
+    importer = importer_for(header)
     rows = importer.parse(header, raw_rows)
     prints = fingerprints(rows)
     existing = set()

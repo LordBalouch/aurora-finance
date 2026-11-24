@@ -4,7 +4,10 @@ import re
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
 
-DATE_FORMATS = ("%d.%m.%Y", "%Y-%m-%d", "%Y/%m/%d", "%d/%m/%Y", "%d.%m.%y")
+DATE_FORMATS = (
+    "%d.%m.%Y", "%Y-%m-%d", "%Y/%m/%d", "%d/%m/%Y", "%d.%m.%y",
+    "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%d.%m.%Y %H:%M",  # Revolut and card exports
+)  # fmt: skip
 
 _SPACES = re.compile(r"[\s  ]+")
 

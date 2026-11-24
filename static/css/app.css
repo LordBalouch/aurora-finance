@@ -377,3 +377,4 @@ textarea { font: inherit; resize: vertical; }
 .restore { border-top: 1px solid var(--line); margin-top: 20px; }
 #ai-test-wait { display: none; }
 #ai-test-wait.htmx-request { display: inline; }
+.map-form { margin-top: 16px; }

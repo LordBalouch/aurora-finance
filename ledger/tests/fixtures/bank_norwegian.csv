@@ -1,0 +1,3 @@
+TransactionDate;BookDate;Text;Type;CurrencyAmount;Currency;Amount;MerchantCategory
+2026-10-28;2026-10-30;NETFLIX.COM;Purchase;-179.00;NOK;-179.00;Streaming
+2026-10-15;2026-10-15;Innbetaling;Payment;5000.00;NOK;5000.00;

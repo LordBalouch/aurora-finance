@@ -83,3 +83,37 @@ def test_xlsx_with_real_dates_and_numbers():
         (date(2026, 3, 5), Decimal("-72.58")),
         (date(2026, 3, 6), Decimal("20580.17")),
     ]
+
+
+@pytest.mark.parametrize(
+    "name, first",
+    [
+        # Synthetic rows in each bank's export layout. Nordea marks pending card payments
+        # "Reservert" in the date column; those are skipped until they are booked.
+        ("nordea.csv", (date(2026, 10, 30), Decimal("-249.00"), "KIWI 505 STORO")),
+        ("sparebank1.csv", (date(2026, 10, 30), Decimal("-312.40"), "REMA 1000 SAGENE")),
+        ("bank_norwegian.csv", (date(2026, 10, 30), Decimal("-179.00"), "NETFLIX.COM")),
+        ("revolut.csv", (date(2026, 10, 30), Decimal("-42.00"), "Ruter")),
+    ],
+)
+def test_other_banks_are_recognised(name, first):
+    rows = parse(name)
+    assert len(rows) == 2
+    assert (rows[0].date, rows[0].amount, rows[0].description) == first
+    assert rows[1].amount > 0
+
+
+def test_mapped_importer_uses_the_chosen_columns():
+    from ledger.importers import MappedImporter
+
+    header, rows = read_table(b"When;What;Money\n01.02.2026;Shop;-10,00\n")
+    with pytest.raises(ImportFileError):
+        detect(header)
+    importer = MappedImporter("My bank", {"date": "When", "description": "What", "amount": "Money"})
+    assert importer.matches(header)
+    (row,) = importer.parse(header, rows)
+    assert (row.date, row.amount, row.description) == (date(2026, 2, 1), Decimal("-10.00"), "Shop")
+    assert not MappedImporter("x", {"date": "When", "description": "What"}).matches(header)
+    assert not MappedImporter(
+        "x", {"date": "Nope", "description": "What", "amount": "Money"}
+    ).matches(header)

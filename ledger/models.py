@@ -15,6 +15,30 @@ class Account(models.Model):
         return self.name
 
 
+class BankFormat(models.Model):
+    """Columns the user picked once for a file layout we did not recognise. A file with the
+    same header (same column names, any order) is then imported the same way."""
+
+    name = models.CharField(max_length=50)
+    signature = models.CharField(max_length=64, unique=True, help_text="sha256 of the header")
+    header = models.JSONField()
+    columns = models.JSONField(help_text="field -> column name: date, description, amount ...")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def signature_of(header: list[str]) -> str:
+        import hashlib
+
+        names = sorted(h.strip().lower() for h in header if h and h.strip())
+        return hashlib.sha256("\x1f".join(names).encode()).hexdigest()
+
+
 class ImportBatch(models.Model):
     """One imported file. Deleting a batch undoes the import (its transactions cascade)."""
 
