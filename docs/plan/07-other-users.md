@@ -23,14 +23,14 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
       text columns once; the mapping is saved and reused.
 - [x] 7.3 Any AI: an "OpenAI-compatible" provider (base URL + key + model) next to Claude
       and Ollama. That covers OpenAI, Gemini, Mistral, LM Studio and most others.
-- [ ] 7.4 Settings page: AI provider, model, language and data folder in the app instead of
+- [x] 7.4 Settings page: AI provider, model, language and data folder in the app instead of
       `.env`. Keys stay in a local file, never in the database export.
 - [ ] 7.5 Desktop package: one app for macOS and one for Windows that starts the server and
       opens the browser (evaluate Briefcase, PyInstaller or a small Tauri shell). Signing
       needs an Apple Developer account (99 USD/year); without it macOS warns on first start.
 - [ ] 7.6 First-run guide: pick a data folder, import a first file, choose AI or no AI.
 - [ ] 7.7 Norwegian UI (Django i18n), with English kept.
-- [ ] 7.8 Backup and move: export and import the whole database as one file.
+- [x] 7.8 Backup and move: export and import the whole database as one file.
 
 ## Not planned
 - Mobile app. The web UI already works in a phone browser against your own machine; a

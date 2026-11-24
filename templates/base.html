@@ -42,6 +42,9 @@
         {% include "web/icon.html" with name="debt" %}Debt</a>
       <a href="{% url 'web:budget' %}" {% if p == 'budget' %}aria-current="page"{% endif %}>
         {% include "web/icon.html" with name="target" %}Budget</a>
+      <div class="nav-label">App</div>
+      <a href="{% url 'web:settings' %}" {% if p == 'settings' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="gear" %}Settings</a>
       {% endwith %}
     </nav>
   </aside>

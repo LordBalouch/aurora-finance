@@ -27,6 +27,20 @@
     });
   }
 
+  // Settings: show only the fields of the chosen AI provider.
+  function initProviderChoice(root) {
+    const select = root.querySelector("select[name=provider]");
+    if (!select || select.dataset.ready) return;
+    select.dataset.ready = "1";
+    const sync = () => {
+      document.querySelectorAll("[data-provider]").forEach((group) => {
+        group.hidden = group.dataset.provider !== select.value;
+      });
+    };
+    select.addEventListener("change", sync);
+    sync();
+  }
+
   // Ask page: an example question fills the field and asks it.
   document.addEventListener("click", (e) => {
     const chip = e.target.closest("[data-question]");
@@ -50,7 +64,7 @@
     if (search) { e.preventDefault(); search.focus(); }
   });
 
-  document.addEventListener("DOMContentLoaded", () => { initDropzones(document); initAccountChoice(document); });
+  document.addEventListener("DOMContentLoaded", () => { initDropzones(document); initAccountChoice(document); initProviderChoice(document); });
 })();
 
 // Table rows with data-href open their drill-down link (the first cell also holds a real link).
