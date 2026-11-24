@@ -46,6 +46,10 @@
       <a href="{% url 'web:settings' %}" {% if p == 'settings' %}aria-current="page"{% endif %}>
         {% include "web/icon.html" with name="gear" %}Settings</a>
       {% endwith %}
+      {% if desktop %}
+      <form method="post" action="{% url 'web:quit' %}" data-confirm="Stop Aurora? Your data is saved.">{% csrf_token %}
+        <button class="nav-button" type="submit">{% include "web/icon.html" with name="power" %}Quit Aurora</button></form>
+      {% endif %}
     </nav>
   </aside>
   <div class="main">

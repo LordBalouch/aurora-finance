@@ -1,7 +1,7 @@
 # Port 8010: 8000 is often taken by other local projects.
 PY := .venv/bin/python
 
-.PHONY: dev test cov lint fmt migrate import demo
+.PHONY: dev test cov lint fmt migrate import demo app desktop
 
 dev:
 	$(PY) manage.py runserver 8010
@@ -11,7 +11,7 @@ test:
 
 # Test coverage per module (CI fails below 90 %).
 cov:
-	.venv/bin/pytest --cov=insights --cov=ledger --cov=ai --cov=web --cov-report=term-missing
+	.venv/bin/pytest --cov=insights --cov=ledger --cov=ai --cov=web --cov=desktop --cov-report=term-missing
 
 lint:
 	.venv/bin/ruff check .
@@ -36,3 +36,12 @@ demo:
 	$(DEMO) $(PY) manage.py migrate -v 0
 	$(DEMO) $(PY) manage.py make_demo_data
 	$(DEMO) $(PY) manage.py runserver 8012
+
+# The desktop app from source: your own data folder, opens the browser (see desktop/launcher.py).
+desktop:
+	$(PY) desktop/launcher.py
+
+# Package it as a program: dist/Aurora/ (and dist/Aurora.app on macOS).
+app:
+	.venv/bin/pip install -q -r requirements-desktop.txt
+	.venv/bin/pyinstaller --noconfirm --log-level WARN desktop/aurora.spec

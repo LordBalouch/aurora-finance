@@ -5,11 +5,14 @@ from pathlib import Path
 import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / "data"
-DATA_DIR.mkdir(exist_ok=True)
 
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(BASE_DIR / ".env")
+
+# Where the database, uploads, backups and settings live. The desktop app points this at
+# the user's own folder (desktop/launcher.py); from source it is data/ in the repo.
+DATA_DIR = Path(env("AURORA_DATA_DIR", default=str(BASE_DIR / "data")))
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 DEBUG = env("DEBUG")
 SECRET_KEY = env("SECRET_KEY", default="dev-only-not-secret" if DEBUG else environ.Env.NOTSET)
@@ -29,6 +32,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    # Serves the static files when DEBUG is off (the desktop app), straight from static/.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -70,6 +75,10 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+WHITENOISE_USE_FINDERS = True
+# Set by desktop/launcher.py: shows "Quit Aurora", which stops the local server.
+DESKTOP = env.bool("AURORA_DESKTOP", default=False)
+WHITENOISE_AUTOREFRESH = DEBUG
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
