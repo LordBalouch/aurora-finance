@@ -1,0 +1,25 @@
+{% load text %}
+{% if error %}
+  <p class="msg msg-warning">{{ error }}</p>
+{% else %}
+  <div class="ai-box ask-box">
+    <p class="ask-question muted">{{ answer.question }}</p>
+    <div class="ask-text">{{ answer.text|answer_html }}</div>
+    {% if answer.chart %}
+      <div class="chart" data-chart="ask_chart" role="img" aria-label="Chart of the last lookup"></div>
+      {{ answer.chart|json_script:"ask_chart" }}
+    {% endif %}
+    <div class="ai-foot">
+      <span class="chip chip-ai">AI · {% if answer.cached %}saved answer from {{ answer.created_at|date:"j M H:i" }}{% else %}new answer{% endif %}</span>
+      <details><summary>What the AI looked up ({{ answer.lookups|length }})</summary>
+        {% for l in answer.lookups %}<p class="ask-lookup"><code>{{ l.tool }}({% for k, v in l.arguments.items %}{{ k }}={{ v }}{% if not forloop.last %}, {% endif %}{% endfor %})</code>{% if l.error %} <span class="neg">error: {{ l.error }}</span>{% endif %}</p>
+        {% if l.result %}<pre>{{ l.result|pretty_json }}</pre>{% endif %}{% empty %}<p>Nothing: it answered without looking anything up.</p>{% endfor %}
+      </details>
+      <form hx-post="{% url 'web:ask' %}" hx-target="#ask-answer" hx-swap="innerHTML" hx-indicator=".ask">
+        <input type="hidden" name="question" value="{{ answer.question }}"><input type="hidden" name="refresh" value="1">
+        <button class="btn btn-ghost" type="submit">Ask again</button>
+      </form>
+    </div>
+    <p class="note">AI can be wrong. Check the numbers it looked up before you act on them.</p>
+  </div>
+{% endif %}

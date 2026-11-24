@@ -1,7 +1,7 @@
 # Status
 
-**Current phase:** 5.5 ask your data (`05-ai.md`), then phase 7
-**Next task:** 5.5a `ai/tools.py`
+**Current phase:** 7 for other users (`07-other-users.md`)
+**Next task:** 7.4 Settings page
 
 | Phase | File | State |
 |---|---|---|
@@ -11,7 +11,7 @@
 | 3 Analysis + dashboard | 03-analysis.md | done (3.11 → phase 6) |
 | 3b Year & debt | 03b-year-and-debt.md | done |
 | 4 Budget | 04-budget.md | done |
-| 5 AI tips | 05-ai.md | core done (5.2, 5.5 open) |
+| 5 AI tips | 05-ai.md | done (5.2 waits for new merchants) |
 | 6 Portfolio polish | 06-portfolio.md | done, public |
 | 7 For other users | 07-other-users.md | planned |
 
@@ -19,6 +19,7 @@
 Private notes about the owner's own finances live in `data/owner-notes.md` (gitignored), never in git.
 
 ## Log (newest first, one line each)
+- 2026-11-24 5.5 Ask your data: nine read-only tools, provider layer (Claude/Ollama/OpenAI-compatible), /ask/ page.
 - 2026-11-24 Phase 7 planned (other users: banks, any AI, desktop package); 5.5 planned in detail.
 - 2026-11-24 Local AI through Ollama (gpt-oss:20b best in a test); button renamed "Aurora's take".
 - 2026-11-24 Seed rules: locality-hinting merchants moved to the owner's own rules.

@@ -4,10 +4,12 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-def no_real_ai(settings):
-    """Tests never call a real model, whatever the local .env says (no key, no Ollama)."""
+def no_real_ai(settings, tmp_path):
+    """Tests never call a real model or read the owner's settings, whatever is local."""
     settings.AI_PROVIDER = "anthropic"
     settings.ANTHROPIC_API_KEY = ""
+    settings.OPENAI_BASE_URL = settings.OPENAI_API_KEY = settings.OPENAI_MODEL = ""
+    settings.LOCAL_SETTINGS_FILE = str(tmp_path / "settings.json")
 
 
 @pytest.fixture

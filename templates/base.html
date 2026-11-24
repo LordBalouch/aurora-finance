@@ -24,6 +24,8 @@
         {% include "web/icon.html" with name="trend" %}Trends</a>
       <a href="{% url 'web:insights' %}" {% if p == 'insights' %}aria-current="page"{% endif %}>
         {% include "web/icon.html" with name="spark" %}Insights</a>
+      <a href="{% url 'web:ask' %}" {% if p == 'ask' %}aria-current="page"{% endif %}>
+        {% include "web/icon.html" with name="chat" %}Ask</a>
       <a href="{% url 'web:transactions' %}" {% if p == 'transactions' %}aria-current="page"{% endif %}>
         {% include "web/icon.html" with name="list" %}Transactions</a>
       <a href="{% url 'web:import' %}" {% if p == 'import' %}aria-current="page"{% endif %}>

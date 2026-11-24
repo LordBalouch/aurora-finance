@@ -27,6 +27,16 @@
     });
   }
 
+  // Ask page: an example question fills the field and asks it.
+  document.addEventListener("click", (e) => {
+    const chip = e.target.closest("[data-question]");
+    if (!chip) return;
+    const form = document.querySelector(".ask-form");
+    if (!form) return;
+    form.querySelector("[name=question]").value = chip.dataset.question;
+    form.requestSubmit();
+  });
+
   // Forms that need a confirmation click.
   document.addEventListener("submit", (e) => {
     const msg = e.target.dataset && e.target.dataset.confirm;

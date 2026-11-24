@@ -2,6 +2,7 @@ from django.urls import path
 
 from . import (
     ai_views,
+    ask_views,
     budget,
     categories,
     imports,
@@ -24,6 +25,7 @@ urlpatterns = [
     path("years/<int:year>/edit/", wealth.year_edit, name="year_edit"),
     path("debt/", wealth.debt, name="debt"),
     path("ai/<slug:card>/", ai_views.ask, name="ai_ask"),
+    path("ask/", ask_views.ask_page, name="ask"),
     path("budget/", budget.budget, name="budget"),
     path("budget/create/", budget.budget_create, name="budget_create"),
     path("budget/save/", budget.budget_save, name="budget_save"),

@@ -83,3 +83,11 @@ OLLAMA_MODEL = env("OLLAMA_MODEL", default="qwen3:8b")
 # Thinking first: slower (about a minute), but small models then misread the numbers less.
 OLLAMA_THINK = env.bool("OLLAMA_THINK", default=True)
 AI_LANGUAGE = env("AI_LANGUAGE", default="Norwegian (bokmål)")
+# Optional context for the AI, e.g. "self-employed, two children". Set it in Settings.
+AI_ABOUT_ME = env("AI_ABOUT_ME", default="")
+# Any OpenAI-compatible chat API (AI_PROVIDER=openai): OpenAI, Gemini, Mistral, LM Studio ...
+OPENAI_BASE_URL = env("OPENAI_BASE_URL", default="")
+OPENAI_API_KEY = env("OPENAI_API_KEY", default="")
+OPENAI_MODEL = env("OPENAI_MODEL", default="")
+# The Settings page stores its choices here; they win over .env.
+LOCAL_SETTINGS_FILE = env("LOCAL_SETTINGS_FILE", default=str(DATA_DIR / "settings.json"))

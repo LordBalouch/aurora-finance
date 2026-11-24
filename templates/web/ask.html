@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Ask · Aurora{% endblock %}
+{% block heading %}Ask your data{% endblock %}
+{% block content %}
+  <section class="card ask">
+    {% if ai_available %}
+    <form class="ask-form" hx-post="{% url 'web:ask' %}" hx-target="#ask-answer" hx-swap="innerHTML" hx-indicator=".ask">
+      <label class="sr-only" for="question">Your question</label>
+      <input id="question" name="question" type="text" maxlength="500" required autocomplete="off"
+             placeholder="For example: how much did I spend on eating out this year?">
+      <button class="btn btn-ai" type="submit"><span aria-hidden="true">✦</span> Ask</button>
+    </form>
+    <div class="ask-examples" aria-label="Example questions">
+      {% for q in examples %}<button class="chip chip-button" type="button" data-question="{{ q }}">{{ q }}</button>{% endfor %}
+    </div>
+    <p class="ai-wait muted ask-wait">Looking it up…{% if local %} A local model can take a minute.{% endif %}</p>
+    {% else %}
+    <p class="card-insight">{{ ai_hint }}</p>
+    <p class="muted">Every other page works without AI.</p>
+    {% endif %}
+    <div id="ask-answer" aria-live="polite"></div>
+  </section>
+  <p class="note">The AI looks the numbers up with fixed, read-only tools: it cannot change anything and never writes its own queries. Each answer lists what it looked up.</p>
+{% endblock %}
