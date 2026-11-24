@@ -14,7 +14,9 @@ def test_dashboard_renders_sample_with_charts(client):
     response = client.get(reverse("web:dashboard"))
     assert response.status_code == 200
     html = response.content.decode()
-    assert "Sample data" in html
+    assert "Welcome to Aurora" in html and "made-up numbers" in html
+    # Nothing imported yet: only "data stays here" is ticked.
+    assert html.count('class="step done"') == 1 and "Import a bank export" in html
     for chart_id in ("trend", "categories", "spark-income", "spark-rate"):
         assert f'data-chart="{chart_id}"' in html
         assert f'id="{chart_id}"' in html

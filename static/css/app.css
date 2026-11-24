@@ -378,3 +378,13 @@ textarea { font: inherit; resize: vertical; }
 #ai-test-wait { display: none; }
 #ai-test-wait.htmx-request { display: inline; }
 .map-form { margin-top: 16px; }
+
+/* First-run steps */
+.steps { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.step { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.step p { margin: 2px 0 0; font-size: 13px; color: var(--text-2); }
+.step > div { flex: 1 1 auto; min-width: 0; }
+.step-mark { flex: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; border: 1px solid var(--line); color: var(--text-2); }
+.step.done .step-mark { border-color: rgba(34, 211, 238, 0.6); color: #67e8f9; }
+.step.done strong { color: var(--text-2); }
+@media (max-width: 640px) { .step { flex-wrap: wrap; } .step .btn { margin-left: 42px; } }

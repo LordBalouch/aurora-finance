@@ -88,6 +88,33 @@ def period_links(period: str) -> list:
     return [(key, name, key == period) for key, (name, _) in PERIODS.items()]
 
 
+def _first_steps(df: pd.DataFrame) -> list[dict]:
+    """The getting-started checklist shown until there is a complete month of data."""
+    from django.conf import settings
+
+    from ai.providers import available
+
+    uncategorized = int(df["category"].isna().sum()) if len(df) else 0
+    return [
+        {"done": True, "title": "Your data stays on this computer",
+         "text": f"Everything is saved in {settings.DATABASES['default']['NAME']}. Nothing is "
+                 "sent anywhere. Download a backup now and then from Settings.",
+         "link": "web:settings", "action": "Settings"},
+        {"done": len(df) > 0, "title": "Import a bank export",
+         "text": "Download transactions as CSV or Excel from your online bank, one file per "
+                 "account, at least a few months back.",
+         "link": "web:import", "action": "Import"},
+        {"done": len(df) > 0 and uncategorized == 0, "title": "Check the categories",
+         "text": f"{uncategorized} transactions still need a category." if uncategorized else
+                 "Built-in rules sort most transactions. Anything left over waits here.",
+         "link": "web:categories", "action": "Categories"},
+        {"done": available(), "title": "Choose an AI (optional)",
+         "text": "Claude, a free local model, or none. Every page except Aurora's take and Ask "
+                 "works without AI.",
+         "link": "web:settings", "action": "Settings"},
+    ]  # fmt: skip
+
+
 def dashboard(request):
     period = period_from(request)
     today = date.today()
@@ -117,6 +144,7 @@ def dashboard(request):
     top = groups.index[0] if len(groups) else None
     context = {
         "is_sample": is_sample,
+        "steps": _first_steps(df) if is_sample else None,
         "periods": period_links(period),
         "latest_month": window.index[-1].strftime("%B %Y"),
         "span": span,
