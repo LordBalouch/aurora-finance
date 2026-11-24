@@ -25,7 +25,7 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
       and Ollama. That covers OpenAI, Gemini, Mistral, LM Studio and most others.
 - [x] 7.4 Settings page: AI provider, model, language and data folder in the app instead of
       `.env`. Keys stay in a local file, never in the database export.
-- [ ] 7.5 Desktop package: one app for macOS and one for Windows that starts the server and
+- [x] 7.5 Desktop package: one app for macOS and one for Windows that starts the server and
       opens the browser (evaluate Briefcase, PyInstaller or a small Tauri shell). Signing
       needs an Apple Developer account (99 USD/year); without it macOS warns on first start.
 - [x] 7.6 First-run guide: pick a data folder, import a first file, choose AI or no AI.
@@ -40,6 +40,16 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
 - Unknown columns open a step where the user picks date, text and amount (or in/out); the
   choice is saved as a `BankFormat` for that header and used automatically next time. Saved
   layouts are listed on the Import page and can be forgotten.
+
+## 7.5 as built (2026-11-24)
+- `desktop/launcher.py`: picks the user's data folder, runs migrate and the built-in
+  categories, starts waitress on 127.0.0.1 (DEBUG off, a per-install secret key, static files
+  through whitenoise), warms up the first page and then opens the browser. A second start
+  opens the running app instead of starting another. "Quit Aurora" in the menu stops it.
+- `desktop/aurora.spec` (PyInstaller, one folder, about 135 MB): built and tested on macOS
+  (arm64). `.github/workflows/desktop.yml` builds macOS and Windows, starts each once as a
+  smoke test, and attaches zips to a release for a `v*` tag.
+- Not signed: macOS needs right-click → Open the first time, Windows SmartScreen may warn.
 
 ## Not planned
 - Mobile app. The web UI already works in a phone browser against your own machine; a

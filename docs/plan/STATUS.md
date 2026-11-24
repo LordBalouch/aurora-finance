@@ -1,7 +1,7 @@
 # Status
 
 **Current phase:** 7 for other users (`07-other-users.md`)
-**Next task:** 7.7 Norwegian UI, 7.5 desktop package
+**Next task:** 7.7 Norwegian UI
 
 | Phase | File | State |
 |---|---|---|
@@ -19,6 +19,7 @@
 Private notes about the owner's own finances live in `data/owner-notes.md` (gitignored), never in git.
 
 ## Log (newest first, one line each)
+- 2026-11-24 7.5 desktop app: launcher (waitress, own data folder, single instance, Quit), PyInstaller spec, CI builds for macOS and Windows.
 - 2026-11-24 7.6 first-run checklist on the dashboard until there is a complete month of data.
 - 2026-11-24 7.1 more bank layouts (Nordea, SpareBank 1, Bank Norwegian, Revolut) and 7.2 teach a new bank.
 - 2026-11-24 7.4 Settings page (AI provider, keys in a private local file, test button) and 7.8 backup/restore.

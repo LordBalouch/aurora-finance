@@ -26,4 +26,4 @@ jobs:
           python manage.py check
           python manage.py makemigrations --check --dry-run
       - name: Tests
-        run: pytest --cov=insights --cov=ledger --cov=ai --cov=web --cov-report=term --cov-fail-under=90
+        run: pytest --cov=insights --cov=ledger --cov=ai --cov=web --cov=desktop --cov-report=term --cov-fail-under=90

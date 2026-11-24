@@ -388,3 +388,5 @@ textarea { font: inherit; resize: vertical; }
 .step.done .step-mark { border-color: rgba(34, 211, 238, 0.6); color: #67e8f9; }
 .step.done strong { color: var(--text-2); }
 @media (max-width: 640px) { .step { flex-wrap: wrap; } .step .btn { margin-left: 42px; } }
+.nav-button { display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 12px; border: 0; border-radius: 10px; background: none; color: var(--text-2); font: inherit; font-size: 14px; cursor: pointer; text-align: left; }
+.nav-button:hover { color: var(--text); background: var(--glass-hover); }

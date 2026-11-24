@@ -36,7 +36,24 @@ I built it for my own finances, and as a data-analysis project. It runs locally,
 
 ![Ask your data](docs/screenshots/ask.png)
 
-## Quick start
+## Download
+
+Aurora runs on your own computer: there is no account and no server, and your data stays in
+a folder you own.
+
+1. Download `Aurora-macOS.zip` or `Aurora-Windows.zip` from the
+   [latest release](https://github.com/LordBalouch/aurora-finance/releases/latest) and unzip it.
+2. Start **Aurora**. A small window shows where your data is kept, and the app opens in
+   your browser. Close the window, or click **Quit Aurora** in the menu, to stop it.
+   - macOS: the app is not signed with an Apple developer account, so the first time,
+     right-click it, choose **Open** and confirm.
+   - Windows: if SmartScreen warns, choose **More info → Run anyway**.
+3. Import a CSV or Excel export from your bank. The dashboard shows a short checklist.
+
+Your data is in `~/Library/Application Support/Aurora` (macOS) or `%APPDATA%\Aurora`
+(Windows). Settings → Download a backup saves all of it as one file.
+
+## Quick start (from source)
 
 You need Python 3.13. Everything else comes from `pip`.
 
@@ -136,9 +153,10 @@ flowchart LR
 ## Tests and quality
 
 ```bash
-make test        # pytest, about 150 tests
+make test        # pytest, about 210 tests
 make cov         # coverage per module: 97 % in total, 96–100 % in insights/
 make lint        # ruff
+make app         # package the desktop app with PyInstaller (dist/)
 ```
 
 CI runs lint and tests on every push. The AI tests use a fake client, so they never call
