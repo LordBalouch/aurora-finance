@@ -24,13 +24,16 @@ I built it for my own finances, and as a data-analysis project. It runs locally,
 | **Insights** | Recurring payments and price rises, unusual months, a Sankey diagram of where the money went, and spending by weekday and by day of month. |
 | **Budget** | A budget suggested from your history, progress against an even pace, an end-of-month forecast, and savings goals with a projected date. |
 | **Years & debt** | Figures from the yearly tax settlement, the effective interest rate, and a payoff plan that shows what paying extra each month would save. |
-| **Aurora's take** | AI advice on every analysis card, from Claude or a local model. The model gets only the numbers the card shows, and you can see exactly which numbers it was given. |
+| **Ask your data** | Ask a question in plain language. The AI answers by calling fixed, read-only analysis tools, and shows a chart and every lookup it made. |
+| **Aurora's take** | AI advice on every analysis card, from Claude, a local model or any OpenAI-compatible API. The model gets only the numbers the card shows, and you can see exactly which numbers it was given. |
 
 | Insights | Budget |
 |---|---|
 | ![Insights](docs/screenshots/insights.png) | ![Budget](docs/screenshots/budget.png) |
 | **Debt** | **Mobile** |
 | ![Debt](docs/screenshots/debt.png) | <img src="docs/screenshots/dashboard-mobile.png" width="260" alt="Dashboard on a phone"> |
+
+![Ask your data](docs/screenshots/ask.png)
 
 ## Quick start
 
@@ -52,18 +55,16 @@ make dev         # http://localhost:8010 → Import
 `make demo` writes to `data/demo.sqlite3` and refuses to run against a database that
 already has transactions, so it can never mix synthetic rows into real data.
 
-To turn on the AI buttons, put `ANTHROPIC_API_KEY=...` in `.env` (see `.env.example`). Or
-use a free local model through [Ollama](https://ollama.com), so nothing leaves your machine:
+### AI (optional)
 
-```bash
-ollama pull qwen3:8b
-echo "AI_PROVIDER=ollama" >> .env
-```
+Every feature except the AI ones works from your files alone. For Aurora's take and Ask your
+data, pick one provider in `.env` (see `.env.example`):
 
-A local answer takes about a minute on an M4 laptop, and a small model makes more mistakes
-than Claude. With 24 GB of memory or more, `OLLAMA_MODEL=gpt-oss:20b` reads the numbers
-better than the default `qwen3:8b` (in a side-by-side test on three cards it made no
-arithmetic mistakes on the debt card, where the 8B model mixed up the rates). Every other feature works without either.
+| Provider | Setting | Notes |
+|---|---|---|
+| Claude (recommended) | `ANTHROPIC_API_KEY=...` | Best answers. Only the numbers a card shows, or the results of the lookups, are sent. |
+| Local model | `AI_PROVIDER=ollama` | Free, and nothing leaves your machine. Run `ollama pull qwen3:8b` first; with 24 GB of memory or more, `OLLAMA_MODEL=gpt-oss:20b` reads numbers better. Answers take up to a minute. |
+| Any OpenAI-compatible API | `AI_PROVIDER=openai`, `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `OPENAI_MODEL` | OpenAI, Gemini, Mistral, LM Studio and others. |
 
 ## The analysis as a notebook
 
@@ -85,8 +86,11 @@ flowchart LR
     P --> A[insights/*<br/>pure pandas]
     A --> W[web views<br/>Django + HTMX]
     W --> E[ECharts]
-    A --> AI[ai.advisor<br/>facts → Claude → JSON tips]
+    A --> AI[ai.advisor<br/>facts → model → JSON tips]
+    A --> T[ai.tools<br/>read-only lookups]
+    T --> Q[ai.ask<br/>question → tool calls → answer]
     AI --> W
+    Q --> W
 ```
 
 - **`ledger/`** holds the models, the importers (with format detection and duplicate
@@ -97,9 +101,11 @@ flowchart LR
 - **`web/`** contains thin Django views that call `insights` and pass the result to the
   templates. It uses HTMX for in-place updates and hand-written CSS on design tokens, with
   no JavaScript build step.
-- **`ai/`** builds a fact sheet from numbers computed on the server, asks Claude (or a local
-  model through Ollama) for structured JSON (summary plus tips), and caches each answer by
-  the exact prompt.
+- **`ai/`** holds the AI features. `advisor` builds a fact sheet from numbers computed on the
+  server and asks for structured JSON (summary plus tips). `ask` runs a tool-use loop over
+  `tools`: nine read-only functions on top of `insights`, with checked arguments. `providers`
+  speaks to Claude, Ollama or any OpenAI-compatible API. Answers are cached by the exact
+  request.
 
 ## Analysis methods
 

@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from ai import advisor
+from ai import advisor, providers
 from ai.advisor import AIUnavailable, advise, build_prompt
 from ledger.models import AIAdvice
 
@@ -84,7 +84,7 @@ def test_refusal_and_bad_json_raise_a_readable_error():
 def test_without_a_key_the_feature_is_off(settings):
     settings.ANTHROPIC_API_KEY = ""
     assert not advisor.available()
-    with pytest.raises(AIUnavailable, match="ANTHROPIC_API_KEY"):
+    with pytest.raises(AIUnavailable, match="No AI is set up"):
         advise("z", "Z", {}, "t")
 
 
@@ -98,7 +98,7 @@ def ollama(settings, monkeypatch):
     settings.OLLAMA_THINK = True
     calls = []
 
-    def post(url, body, timeout):
+    def post(url, body, timeout, headers=None):
         calls.append((url, body))
         return {
             "message": {"content": json.dumps(ANSWER)},
@@ -107,7 +107,7 @@ def ollama(settings, monkeypatch):
             "eval_count": 300,
         }
 
-    monkeypatch.setattr(advisor, "_post_json", post)
+    monkeypatch.setattr(providers, "_post_json", post)
     return calls
 
 
@@ -147,14 +147,14 @@ def test_ollama_errors_are_readable(ollama, monkeypatch, error, message):
     def fail(*args, **kwargs):
         raise error
 
-    monkeypatch.setattr(advisor, "_post_json", fail)
+    monkeypatch.setattr(providers, "_post_json", fail)
     with pytest.raises(AIUnavailable, match=message):
         advise("x", "X", {}, "t")
 
 
 def test_ollama_answer_cut_off(ollama, monkeypatch):
     monkeypatch.setattr(
-        advisor,
+        providers,
         "_post_json",
         lambda *a, **k: {"message": {"content": "{"}, "done_reason": "length"},
     )

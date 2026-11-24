@@ -21,7 +21,7 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
       fixture of synthetic rows for each format.
 - [ ] 7.2 "Teach a new bank": when no importer matches, the user picks the date, amount and
       text columns once; the mapping is saved and reused.
-- [ ] 7.3 Any AI: an "OpenAI-compatible" provider (base URL + key + model) next to Claude
+- [x] 7.3 Any AI: an "OpenAI-compatible" provider (base URL + key + model) next to Claude
       and Ollama. That covers OpenAI, Gemini, Mistral, LM Studio and most others.
 - [ ] 7.4 Settings page: AI provider, model, language and data folder in the app instead of
       `.env`. Keys stay in a local file, never in the database export.

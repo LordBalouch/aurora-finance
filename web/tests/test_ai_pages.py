@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 from django.urls import reverse
 
-from ai import advisor
+from ai import providers
 from ai.tests.test_advisor import FakeClient
 from ledger.models import Account, Category, TaxYear
 
@@ -28,7 +28,7 @@ def data(add_transactions):
 def fake(settings, monkeypatch):
     settings.ANTHROPIC_API_KEY = "test-key"
     client = FakeClient()
-    monkeypatch.setattr(advisor, "_client", lambda: client)
+    monkeypatch.setattr(providers, "claude_client", lambda: client)
     return client
 
 
@@ -59,6 +59,6 @@ def test_unknown_card_and_get_are_refused(client, fake):
 def test_without_key_button_is_disabled_and_answer_explains(client, data, settings):
     settings.ANTHROPIC_API_KEY = ""
     page = client.get(reverse("web:dashboard")).content.decode()
-    assert "disabled" in page and "ANTHROPIC_API_KEY" in page and "Aurora's take" in page
+    assert "disabled" in page and "Settings" in page and "Aurora's take" in page
     answer = client.post(reverse("web:ai_ask", args=["overview"])).content.decode()
-    assert "ANTHROPIC_API_KEY" in answer
+    assert "No AI is set up" in answer

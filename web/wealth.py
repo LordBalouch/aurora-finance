@@ -147,19 +147,26 @@ def _loans(balances, payments: pd.Series, default_rate: float | None) -> tuple[l
              "payment": float(payments.sum()), "estimated_rate": True}], True  # fmt: skip
 
 
+def current_loans(df=None):
+    """Everything the payoff plan needs, from the database: the tax-year table, the latest
+    effective rate, loan payments in the bank data, the latest balance per lender, the
+    loans for `plan` and whether they are one aggregate loan. Also used by 'Ask your data'."""
+    table = years_table(list(TaxYear.objects.values()))
+    rate = float(table["effective_rate"].iloc[-1]) if not table.empty else None
+    payments = loan_payments(transactions_df() if df is None else df)
+    latest = {}
+    for b in DebtBalance.objects.order_by("lender", "-as_of"):
+        latest.setdefault(b.lender, b)
+    loans, aggregate = _loans(list(latest.values()), payments, rate)
+    return table, rate, payments, latest, loans, aggregate
+
+
 def debt(request):
     try:
         extra = max(0, min(int(request.GET.get("extra", "0") or 0), 1_000_000))
     except ValueError:
         extra = 0
-    table = years_table(list(TaxYear.objects.values()))
-    rate = float(table["effective_rate"].iloc[-1]) if not table.empty else None
-    payments = loan_payments(transactions_df())
-    # Latest balance per lender.
-    latest = {}
-    for b in DebtBalance.objects.order_by("lender", "-as_of"):
-        latest.setdefault(b.lender, b)
-    loans, aggregate = _loans(list(latest.values()), payments, rate)
+    table, rate, payments, latest, loans, aggregate = current_loans()
     base = plan(loans) if loans else None
     faster = plan(loans, extra=extra) if loans and extra else None
     context = {

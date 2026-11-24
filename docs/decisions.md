@@ -32,6 +32,15 @@ Short and in no particular order. Each one says what was chosen, and why.
   machine. Thinking is on by default: in a test on real data, an 8B model without it named
   the wrong month and invented a credit card debt, and with it got both right. The cost is
   about a minute per answer instead of 20 seconds.
+- **Ask your data uses tools, not SQL.** The model picks from nine read-only functions with
+  checked arguments, and a bad argument goes back to it as an error message. It cannot change
+  anything, read more than a tool returns or invent a query, and the page shows every lookup.
+  Tools return finished numbers (debt-free month, interest saved) because small models get
+  date arithmetic wrong.
+- **One provider layer.** Claude, Ollama and OpenAI-compatible APIs sit behind the same two
+  calls (one JSON answer, and a chat with tools), so the user chooses the AI and nothing
+  else changes. The AI's instructions are generic; anything personal goes in an optional
+  "About you" setting stored locally.
 - **Demo data goes through the real pipeline.** The generator writes bank-style text, and
   the real rules categorize it. The demo therefore shows how the categorizer actually
   behaves, and screenshots never need real data.
