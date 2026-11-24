@@ -365,3 +365,15 @@ textarea { font: inherit; resize: vertical; }
 .ask-box .chart { margin-top: 12px; }
 .ask-lookup { margin: 8px 0 4px; }
 @media (max-width: 640px) { .ask-form { flex-direction: column; } }
+
+/* Settings */
+.settings-group { border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 12px 16px 14px; margin: 14px 0; min-width: 0; }
+.settings-group legend { padding: 0 6px; font-size: 13px; color: var(--text-2); }
+.settings-group[hidden] { display: none; }
+.check { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); margin: 8px 0; }
+.check input { width: auto; }
+.mono-path { font-family: var(--mono); font-size: 12px; color: var(--text-3); word-break: break-all; margin: 0 0 12px; }
+.card-subtitle { font-size: 14px; margin: 20px 0 8px; }
+.restore { border-top: 1px solid var(--line); margin-top: 20px; }
+#ai-test-wait { display: none; }
+#ai-test-wait.htmx-request { display: inline; }

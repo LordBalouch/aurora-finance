@@ -7,6 +7,7 @@ from . import (
     categories,
     imports,
     insights_page,
+    settings_page,
     transactions,
     trends,
     views,
@@ -36,6 +37,10 @@ urlpatterns = [
     path("categories/", categories.categories, name="categories"),
     path("categories/assign/", categories.assign, name="assign"),
     path("import/", imports.import_page, name="import"),
+    path("settings/", settings_page.settings_page, name="settings"),
+    path("settings/test-ai/", settings_page.test_ai, name="settings_test_ai"),
+    path("settings/backup/", settings_page.download_backup, name="backup"),
+    path("settings/restore/", settings_page.restore_backup, name="restore"),
     path("import/confirm/", imports.import_confirm, name="import_confirm"),
     path("import/<int:pk>/undo/", imports.import_undo, name="import_undo"),
 ]

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Settings · Aurora{% endblock %}
+{% block heading %}Settings{% endblock %}
+{% block content %}
+<div class="stack">
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">AI</h2><span class="chip chip-ai">{% if ai_available %}on{% else %}off{% endif %}</span></div>
+    <p class="card-insight">AI is optional: every page except Aurora's take and Ask works without it. Claude gives the best answers. A local model through <a href="https://ollama.com">Ollama</a> is free and keeps everything on this machine. Any OpenAI-compatible service (OpenAI, Gemini, Mistral, LM Studio …) works too.</p>
+    <form method="post" class="settings-form">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<p class="msg msg-error">{{ form.non_field_errors|join:" " }}</p>{% endif %}
+      <div class="form-grid">
+        {% include "web/_settings_field.html" with f=form.provider %}{% include "web/_settings_field.html" with f=form.language %}
+      </div>
+      {% include "web/_settings_field.html" with f=form.about_me wide=True %}
+      <fieldset class="settings-group" data-provider="anthropic"><legend>Claude</legend>
+        <div class="form-grid">{% include "web/_settings_field.html" with f=form.anthropic_key %}{% include "web/_settings_field.html" with f=form.ai_model %}</div>
+        <p class="help">Stored key: {{ anthropic_status }}</p>
+      </fieldset>
+      <fieldset class="settings-group" data-provider="ollama"><legend>Local model (Ollama)</legend>
+        <div class="form-grid">{% include "web/_settings_field.html" with f=form.ollama_url %}{% include "web/_settings_field.html" with f=form.ollama_model %}</div>
+        <label class="check">{{ form.ollama_think }} {{ form.ollama_think.label }}</label>
+      </fieldset>
+      <fieldset class="settings-group" data-provider="openai"><legend>OpenAI-compatible API</legend>
+        <div class="form-grid">{% include "web/_settings_field.html" with f=form.openai_base_url %}{% include "web/_settings_field.html" with f=form.openai_key %}{% include "web/_settings_field.html" with f=form.openai_model %}</div>
+        <p class="help">Stored key: {{ openai_status }}</p>
+      </fieldset>
+      <label class="check">{{ form.forget_keys }} {{ form.forget_keys.label }}</label>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit">Save</button>
+        <button class="btn" type="button" hx-post="{% url 'web:settings_test_ai' %}" hx-target="#ai-test" hx-indicator="#ai-test-wait">Test the saved AI</button>
+        <span id="ai-test-wait" class="ai-wait muted">Asking…</span>
+      </div>
+      <div id="ai-test" aria-live="polite"></div>
+    </form>
+    <p class="note">Settings are stored in {{ db.settings_file }}, readable only by you. They win over <code>.env</code>. They are never part of a backup.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2 class="card-title">Your data</h2></div>
+    <p class="card-insight">Everything lives in one file on this machine: {{ db.transactions }} transactions in {{ db.accounts }} account{{ db.accounts|pluralize }}{% if db.size_mb %}, {{ db.size_mb }} MB{% endif %}. Nothing is stored online. Keep a backup somewhere safe, for example an encrypted disk or your own cloud folder.</p>
+    <p class="mono-path">{{ db.path }}</p>
+    <div class="actions">
+      <a class="btn btn-primary" href="{% url 'web:backup' %}">Download a backup</a>
+    </div>
+    <form class="restore" method="post" action="{% url 'web:restore' %}" enctype="multipart/form-data" data-confirm="Replace all data in Aurora with this backup? The current data is saved to data/backups first.">
+      {% csrf_token %}
+      <h3 class="card-subtitle">Restore a backup</h3>
+      <div class="field"><label for="backup">Backup file (.sqlite3)</label><input id="backup" name="backup" type="file" accept=".sqlite3,.db,application/vnd.sqlite3,application/x-sqlite3" required></div>
+      <label class="check"><input type="checkbox" name="confirm" value="yes" required> Replace everything in Aurora with this backup</label>
+      <div class="actions"><button class="btn" type="submit">Restore</button></div>
+      <p class="help">The current database is copied to data/backups first, so a restore can be undone.</p>
+    </form>
+  </section>
+</div>
+{% endblock %}

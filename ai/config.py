@@ -38,13 +38,31 @@ def saved() -> dict:
 
 
 def conf(name: str):
-    """A setting: the Settings page's value if set, else `.env` / settings.py."""
+    """A setting: the Settings page's value if saved there, else `.env` / settings.py.
+    An empty saved key counts as not saved, so a key in `.env` still works."""
     if name not in KEYS:
         raise KeyError(name)
     stored = saved()
-    if name in stored and stored[name] not in (None, ""):
+    if name in stored and not (name in SECRETS and not stored[name]):
         return stored[name]
     return getattr(settings, name)
+
+
+def _write(data: dict) -> None:
+    path = _path()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".tmp")
+    tmp.write_text(json.dumps(data, indent=1))
+    os.chmod(tmp, 0o600)  # keys inside: readable by the owner only
+    tmp.replace(path)
+
+
+def forget(keys) -> None:
+    """Remove stored values, e.g. the API keys."""
+    data = saved()
+    for key in keys:
+        data.pop(key, None)
+    _write(data)
 
 
 def save(values: dict) -> None:
@@ -56,9 +74,4 @@ def save(values: dict) -> None:
         if key in SECRETS and not value:
             continue
         data[key] = value
-    path = _path()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".tmp")
-    tmp.write_text(json.dumps(data, indent=1))
-    os.chmod(tmp, 0o600)  # keys inside: readable by the owner only
-    tmp.replace(path)
+    _write(data)

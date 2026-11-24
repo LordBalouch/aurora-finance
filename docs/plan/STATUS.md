@@ -1,7 +1,7 @@
 # Status
 
 **Current phase:** 7 for other users (`07-other-users.md`)
-**Next task:** 7.4 Settings page
+**Next task:** 7.2 teach a new bank, then 7.1 other banks
 
 | Phase | File | State |
 |---|---|---|
@@ -19,6 +19,7 @@
 Private notes about the owner's own finances live in `data/owner-notes.md` (gitignored), never in git.
 
 ## Log (newest first, one line each)
+- 2026-11-24 7.4 Settings page (AI provider, keys in a private local file, test button) and 7.8 backup/restore.
 - 2026-11-24 5.5 Ask your data: nine read-only tools, provider layer (Claude/Ollama/OpenAI-compatible), /ask/ page.
 - 2026-11-24 Phase 7 planned (other users: banks, any AI, desktop package); 5.5 planned in detail.
 - 2026-11-24 Local AI through Ollama (gpt-oss:20b best in a test); button renamed "Aurora's take".
