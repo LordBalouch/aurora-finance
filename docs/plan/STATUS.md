@@ -1,7 +1,7 @@
 # Status
 
-**Current phase:** 6 done, repo public → 5.5 next (`05-ai.md`)
-**Next task:** owner tries the AI buttons with an API key; then 5.5 (ask-your-data) or 5.2
+**Current phase:** 5.5 ask your data (`05-ai.md`), then phase 7
+**Next task:** 5.5a `ai/tools.py`
 
 | Phase | File | State |
 |---|---|---|
@@ -13,11 +13,15 @@
 | 4 Budget | 04-budget.md | done |
 | 5 AI tips | 05-ai.md | core done (5.2, 5.5 open) |
 | 6 Portfolio polish | 06-portfolio.md | done, public |
+| 7 For other users | 07-other-users.md | planned |
 
 ## Open questions for the owner
 Private notes about the owner's own finances live in `data/owner-notes.md` (gitignored), never in git.
 
 ## Log (newest first, one line each)
+- 2026-11-24 Phase 7 planned (other users: banks, any AI, desktop package); 5.5 planned in detail.
+- 2026-11-24 Local AI through Ollama (gpt-oss:20b best in a test); button renamed "Aurora's take".
+- 2026-11-24 Seed rules: locality-hinting merchants moved to the owner's own rules.
 - 2026-11-23 Published: fresh public repo (one commit); old history archived privately as aurora-finance-private.
 - 2026-11-23 Notebook 3.11: analysis walkthrough on demo data (robust vs. naive z, median budget, payoff).
 - 2026-11-23 Phase 6.1–6.5: demo data (`make demo`), screenshots, README, coverage 97 % in CI, decisions.md; real names removed from tests.
