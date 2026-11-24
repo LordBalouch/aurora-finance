@@ -1,7 +1,7 @@
 # Status
 
-**Current phase:** 7 for other users (`07-other-users.md`)
-**Next task:** 7.7 Norwegian UI
+**Current phase:** 7 done except 7.7 (Norwegian UI, postponed)
+**Next task:** owner tries the desktop app and Ask; then 7.7 or real-world bank exports
 
 | Phase | File | State |
 |---|---|---|
@@ -13,7 +13,7 @@
 | 4 Budget | 04-budget.md | done |
 | 5 AI tips | 05-ai.md | done (5.2 waits for new merchants) |
 | 6 Portfolio polish | 06-portfolio.md | done, public |
-| 7 For other users | 07-other-users.md | planned |
+| 7 For other users | 07-other-users.md | done except 7.7 |
 
 ## Open questions for the owner
 Private notes about the owner's own finances live in `data/owner-notes.md` (gitignored), never in git.
