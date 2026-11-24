@@ -28,7 +28,7 @@ least the four largest Norwegian banks, and can pick Claude, another AI, or no A
 - [ ] 7.5 Desktop package: one app for macOS and one for Windows that starts the server and
       opens the browser (evaluate Briefcase, PyInstaller or a small Tauri shell). Signing
       needs an Apple Developer account (99 USD/year); without it macOS warns on first start.
-- [ ] 7.6 First-run guide: pick a data folder, import a first file, choose AI or no AI.
+- [x] 7.6 First-run guide: pick a data folder, import a first file, choose AI or no AI.
 - [ ] 7.7 Norwegian UI (Django i18n), with English kept.
 - [x] 7.8 Backup and move: export and import the whole database as one file.
 

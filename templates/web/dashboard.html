@@ -10,10 +10,18 @@
 {% endblock %}
 {% block content %}
   {% if is_sample %}
-  <section class="banner">
-    <span class="chip chip-sample">Sample data</span>
-    <p><strong>This is a preview with made-up numbers.</strong> Import a bank file to see your own.</p>
-    <a class="btn" href="{% url 'web:import' %}">Import a file</a>
+  <section class="card welcome" aria-labelledby="welcome-title">
+    <div class="card-head"><h2 class="card-title" id="welcome-title">Welcome to Aurora</h2><span class="chip chip-sample">The charts below use made-up numbers</span></div>
+    <ol class="steps">
+      {% for s in steps %}
+      <li class="step{% if s.done %} done{% endif %}">
+        <span class="step-mark" aria-hidden="true">{% if s.done %}✓{% else %}{{ forloop.counter }}{% endif %}</span>
+        <div><strong>{{ s.title }}</strong>{% if s.done %}<span class="sr-only"> (done)</span>{% endif %}<p>{{ s.text }}</p></div>
+        <a class="btn{% if not s.done and forloop.counter == 2 %} btn-primary{% endif %}" href="{% url s.link %}">{{ s.action }}</a>
+      </li>
+      {% endfor %}
+    </ol>
+    <p class="note">Your own figures replace the sample as soon as there is one complete month of data.</p>
   </section>
   {% endif %}
 
