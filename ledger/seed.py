@@ -1,6 +1,7 @@
 """Built-in categories and rules for common Norwegian merchants.
 
-Generic only: never put a private person's name here (this file is public on GitHub).
+Generic only: no private person's name, and no local shop, place or station that hints at
+where someone lives or travels (this file is public on GitHub). Those are your own rules.
 Personal rules are made in the app and live in the local database.
 """
 
@@ -120,7 +121,6 @@ RULES = [
             "OBS",
             "ASIA MAT",
             "STORCASH",
-            "KROKSTAD FRUKT",
             "ELITE MAT",
             "ALBERT HEIJN",
             "CONAD",
@@ -129,7 +129,6 @@ RULES = [
             "SUNKOST",
             "NØTTEBLANDEREN",
             "MATKROKEN",
-            "SLEMANI",
         )
     ],
     *[
@@ -172,7 +171,7 @@ RULES = [
     # Transport
     *[
         (p, "Fuel", "out", _W, 40)
-        for p in ("CIRCLE K", "ESSO", "ST1", "SHELL", "BP", "UNO-X", "YX", "ENI06928")
+        for p in ("CIRCLE K", "ESSO", "ST1", "SHELL", "BP", "UNO-X", "YX")
     ],
     *[
         (p, "Parking & tolls", "out", "contains", 40)
@@ -300,16 +299,8 @@ RULES = [
         (p, "Leisure", "out", "contains", 40)
         for p in (
             "KINO",
-            "RØYKENBADET",
-            "ROEYKENBADET",
             "TIVOLI",
             "BOWL",
-            "GAUSTA",
-            "EFTELING",
-            "BLIJDORP",
-            "DIERGAARDE",
-            "DRIEVLIET",
-            "TICKODO",
         )
     ],
     *[
@@ -335,7 +326,6 @@ RULES = [
             "BOOKING.COM",
             "INFLIGHT",
             "AUTOGRILL",
-            "FIUMICINO",
         )
     ],
     # Paid abroad and not matched by anything above: most likely travel.
