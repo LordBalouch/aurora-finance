@@ -3,6 +3,13 @@ from decimal import Decimal
 import pytest
 
 
+@pytest.fixture(autouse=True)
+def no_real_ai(settings):
+    """Tests never call a real model, whatever the local .env says (no key, no Ollama)."""
+    settings.AI_PROVIDER = "anthropic"
+    settings.ANTHROPIC_API_KEY = ""
+
+
 @pytest.fixture
 def add_transactions(db):
     """add_transactions(account, [(date, "amount", category), ...]) -> created rows."""

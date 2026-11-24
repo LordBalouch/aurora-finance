@@ -27,6 +27,11 @@ Short and in no particular order. Each one says what was chosen, and why.
 - **The AI sees only computed numbers, never raw transactions.** Each card sends a small
   fact sheet that the server built. The model must answer in a fixed JSON schema, and
   answers are cached by the exact prompt. Every number in a tip can be traced to the data.
+- **A local model as an alternative to Claude.** With `AI_PROVIDER=ollama` the same prompt
+  and JSON schema go to a model on your own machine. It is free and nothing leaves the
+  machine. Thinking is on by default: in a test on real data, an 8B model without it named
+  the wrong month and invented a credit card debt, and with it got both right. The cost is
+  about a minute per answer instead of 20 seconds.
 - **Demo data goes through the real pipeline.** The generator writes bank-style text, and
   the real rules categorize it. The demo therefore shows how the categorizer actually
   behaves, and screenshots never need real data.

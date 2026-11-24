@@ -1,4 +1,5 @@
 import json
+import urllib.error
 from types import SimpleNamespace
 
 import pytest
@@ -34,6 +35,7 @@ class FakeClient:
 
 @pytest.fixture(autouse=True)
 def key(settings):
+    settings.AI_PROVIDER = "anthropic"
     settings.ANTHROPIC_API_KEY = "test-key"
     settings.AI_MODEL = "claude-opus-5-5"
     settings.AI_LANGUAGE = "Norwegian (bokmål)"
@@ -84,3 +86,77 @@ def test_without_a_key_the_feature_is_off(settings):
     assert not advisor.available()
     with pytest.raises(AIUnavailable, match="ANTHROPIC_API_KEY"):
         advise("z", "Z", {}, "t")
+
+
+@pytest.fixture
+def ollama(settings, monkeypatch):
+    """Local model: records each request to Ollama's chat API, returns a fixed answer."""
+    settings.AI_PROVIDER = "ollama"
+    settings.ANTHROPIC_API_KEY = ""
+    settings.OLLAMA_URL = "http://localhost:11434/"
+    settings.OLLAMA_MODEL = "qwen3:8b"
+    settings.OLLAMA_THINK = True
+    calls = []
+
+    def post(url, body, timeout):
+        calls.append((url, body))
+        return {
+            "message": {"content": json.dumps(ANSWER)},
+            "done_reason": "stop",
+            "prompt_eval_count": 700,
+            "eval_count": 300,
+        }
+
+    monkeypatch.setattr(advisor, "_post_json", post)
+    return calls
+
+
+def test_ollama_needs_no_key_and_sends_the_same_schema(ollama):
+    assert advisor.available()
+    result = advise("debt", "Debt", {"debt": 512400}, "Give tips.")
+    url, body = ollama[0]
+    assert url == "http://localhost:11434/api/chat"
+    assert body["model"] == "qwen3:8b" and body["format"] == advisor.SCHEMA
+    assert body["stream"] is False and body["think"] is True
+    assert "Never invent" in body["messages"][0]["content"]
+    assert '"debt": 512400' in body["messages"][1]["content"]
+    assert body["messages"][1]["content"].endswith("in Norwegian (bokmål).")
+    assert result.summary == "Rentene er høye." and len(result.tips) == 3
+    saved = AIAdvice.objects.get()
+    assert saved.model == "qwen3:8b (thinking)" and saved.input_tokens == 700
+
+
+def test_ollama_and_claude_answers_are_cached_apart(ollama, settings):
+    advise("debt", "Debt", {"a": 1}, "t")
+    settings.AI_PROVIDER, settings.ANTHROPIC_API_KEY = "anthropic", "test-key"
+    client = FakeClient()
+    assert not advise("debt", "Debt", {"a": 1}, "t", client=client).cached
+    assert len(client.calls) == 1 and AIAdvice.objects.count() == 2
+
+
+@pytest.mark.parametrize(
+    "error, message",
+    [
+        (urllib.error.URLError("refused"), "Is the Ollama app running"),
+        (urllib.error.HTTPError("u", 404, "not found", {}, None), "ollama pull qwen3:8b"),
+        (urllib.error.HTTPError("u", 500, "boom", {}, None), "error \\(500\\)"),
+        (TimeoutError(), "took too long"),
+    ],
+)
+def test_ollama_errors_are_readable(ollama, monkeypatch, error, message):
+    def fail(*args, **kwargs):
+        raise error
+
+    monkeypatch.setattr(advisor, "_post_json", fail)
+    with pytest.raises(AIUnavailable, match=message):
+        advise("x", "X", {}, "t")
+
+
+def test_ollama_answer_cut_off(ollama, monkeypatch):
+    monkeypatch.setattr(
+        advisor,
+        "_post_json",
+        lambda *a, **k: {"message": {"content": "{"}, "done_reason": "length"},
+    )
+    with pytest.raises(AIUnavailable, match="cut off"):
+        advise("x", "X", {}, "t")
