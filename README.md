@@ -61,7 +61,9 @@ echo "AI_PROVIDER=ollama" >> .env
 ```
 
 A local answer takes about a minute on an M4 laptop, and a small model makes more mistakes
-than Claude. Every other feature works without either.
+than Claude. With 24 GB of memory or more, `OLLAMA_MODEL=gpt-oss:20b` reads the numbers
+better than the default `qwen3:8b` (in a side-by-side test on three cards it made no
+arithmetic mistakes on the debt card, where the 8B model mixed up the rates). Every other feature works without either.
 
 ## The analysis as a notebook
 
