@@ -9,10 +9,10 @@
     </ol>
     {% endif %}
     <div class="ai-foot">
-      <span class="chip chip-ai">AI · {% if advice.cached %}saved answer from {{ advice.created_at|date:"j M H:i" }}{% else %}new answer{% endif %}</span>
+      <span class="chip chip-ai">AI · {% if advice.cached %}saved take from {{ advice.created_at|date:"j M H:i" }}{% else %}new take{% endif %}</span>
       <details><summary>What the AI saw</summary><pre>{{ advice.facts }}</pre></details>
       <form hx-post="{% url 'web:ai_ask' card %}" hx-target="closest .ai-answer" hx-swap="innerHTML">
-        <input type="hidden" name="refresh" value="1"><button class="btn btn-ghost" type="submit">Ask again</button>
+        <input type="hidden" name="refresh" value="1"><button class="btn btn-ghost" type="submit">New take</button>
       </form>
     </div>
     <p class="note">AI can be wrong. The numbers come from your data; the advice does not replace an accountant.</p>

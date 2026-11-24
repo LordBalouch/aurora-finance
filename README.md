@@ -24,7 +24,7 @@ I built it for my own finances, and as a data-analysis project. It runs locally,
 | **Insights** | Recurring payments and price rises, unusual months, a Sankey diagram of where the money went, and spending by weekday and by day of month. |
 | **Budget** | A budget suggested from your history, progress against an even pace, an end-of-month forecast, and savings goals with a projected date. |
 | **Years & debt** | Figures from the yearly tax settlement, the effective interest rate, and a payoff plan that shows what paying extra each month would save. |
-| **Ask AI** | A button on every analysis card, using Claude or a local model. The model gets only the numbers the card shows, and you can see exactly which numbers it was given. |
+| **Aurora's take** | AI advice on every analysis card, from Claude or a local model. The model gets only the numbers the card shows, and you can see exactly which numbers it was given. |
 
 | Insights | Budget |
 |---|---|

@@ -41,6 +41,7 @@ def test_every_card_sends_its_numbers_and_shows_tips(client, data, fake, card):
     assert response.status_code == 200
     html = response.content.decode()
     assert "Rentene er høye." in html and "What the AI saw" in html
+    assert "New take" in html and "AI · new take" in html
     assert len(fake.calls) == 1
 
 
@@ -58,6 +59,6 @@ def test_unknown_card_and_get_are_refused(client, fake):
 def test_without_key_button_is_disabled_and_answer_explains(client, data, settings):
     settings.ANTHROPIC_API_KEY = ""
     page = client.get(reverse("web:dashboard")).content.decode()
-    assert "disabled" in page and "ANTHROPIC_API_KEY" in page
+    assert "disabled" in page and "ANTHROPIC_API_KEY" in page and "Aurora's take" in page
     answer = client.post(reverse("web:ai_ask", args=["overview"])).content.decode()
     assert "ANTHROPIC_API_KEY" in answer
