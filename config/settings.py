@@ -74,6 +74,12 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # AI tips (phase 5). Without a key the feature is off and the app works as before.
+# AI_PROVIDER=ollama uses a local model instead: free, and nothing leaves the machine.
+AI_PROVIDER = env("AI_PROVIDER", default="anthropic")
 ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 AI_MODEL = env("AI_MODEL", default="claude-opus-5-5")
+OLLAMA_URL = env("OLLAMA_URL", default="http://localhost:11434")
+OLLAMA_MODEL = env("OLLAMA_MODEL", default="qwen3:8b")
+# Thinking first: slower (about a minute), but small models then misread the numbers less.
+OLLAMA_THINK = env.bool("OLLAMA_THINK", default=True)
 AI_LANGUAGE = env("AI_LANGUAGE", default="Norwegian (bokmål)")

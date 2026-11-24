@@ -24,7 +24,7 @@ I built it for my own finances, and as a data-analysis project. It runs locally,
 | **Insights** | Recurring payments and price rises, unusual months, a Sankey diagram of where the money went, and spending by weekday and by day of month. |
 | **Budget** | A budget suggested from your history, progress against an even pace, an end-of-month forecast, and savings goals with a projected date. |
 | **Years & debt** | Figures from the yearly tax settlement, the effective interest rate, and a payoff plan that shows what paying extra each month would save. |
-| **Ask AI** | A button on every analysis card. The model gets only the numbers the card shows, and you can see exactly which numbers it was given. |
+| **Ask AI** | A button on every analysis card, using Claude or a local model. The model gets only the numbers the card shows, and you can see exactly which numbers it was given. |
 
 | Insights | Budget |
 |---|---|
@@ -52,8 +52,16 @@ make dev         # http://localhost:8010 → Import
 `make demo` writes to `data/demo.sqlite3` and refuses to run against a database that
 already has transactions, so it can never mix synthetic rows into real data.
 
-To turn on the AI buttons, put `ANTHROPIC_API_KEY=...` in `.env` (see `.env.example`).
-Every other feature works without a key.
+To turn on the AI buttons, put `ANTHROPIC_API_KEY=...` in `.env` (see `.env.example`). Or
+use a free local model through [Ollama](https://ollama.com), so nothing leaves your machine:
+
+```bash
+ollama pull qwen3:8b
+echo "AI_PROVIDER=ollama" >> .env
+```
+
+A local answer takes about a minute on an M4 laptop, and a small model makes more mistakes
+than Claude. Every other feature works without either.
 
 ## The analysis as a notebook
 
@@ -87,8 +95,9 @@ flowchart LR
 - **`web/`** contains thin Django views that call `insights` and pass the result to the
   templates. It uses HTMX for in-place updates and hand-written CSS on design tokens, with
   no JavaScript build step.
-- **`ai/`** builds a fact sheet from numbers computed on the server, asks Claude for
-  structured JSON (summary plus tips), and caches each answer by the exact prompt.
+- **`ai/`** builds a fact sheet from numbers computed on the server, asks Claude (or a local
+  model through Ollama) for structured JSON (summary plus tips), and caches each answer by
+  the exact prompt.
 
 ## Analysis methods
 

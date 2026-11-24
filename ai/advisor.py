@@ -1,13 +1,16 @@
-"""Ask Claude to explain numbers that `insights` already computed.
+"""Ask an AI to explain numbers that `insights` already computed.
 
 The model never computes: it gets the facts of one card as JSON and returns a short summary
 and 2–3 tips that cite those numbers. Answers are cached by the exact request, so asking
-the same thing twice costs nothing. Tests pass a fake client; without an API key the feature
-is off.
+the same thing twice costs nothing. Two providers: Claude through the API (needs a key), or
+a local model through Ollama (AI_PROVIDER=ollama: free, and nothing leaves the machine).
+Tests pass a fake client; without a key or a local model the feature is off.
 """
 
 import hashlib
 import json
+import urllib.error
+import urllib.request
 from dataclasses import dataclass
 
 import anthropic
@@ -64,8 +67,19 @@ class Advice:
     created_at: object
 
 
+def _local() -> bool:
+    return settings.AI_PROVIDER == "ollama"
+
+
 def available() -> bool:
-    return bool(settings.ANTHROPIC_API_KEY)
+    return _local() or bool(settings.ANTHROPIC_API_KEY)
+
+
+def model_name() -> str:
+    """Part of the cache key, so switching model or thinking never reuses an old answer."""
+    if _local():
+        return settings.OLLAMA_MODEL + (" (thinking)" if settings.OLLAMA_THINK else "")
+    return settings.AI_MODEL
 
 
 def _client():
@@ -84,14 +98,37 @@ def advise(card: str, title: str, facts: dict, task: str, *, client=None, refres
     """Summary + tips for one card. Reuses a stored answer for an identical request."""
     system = SYSTEM.format(language=settings.AI_LANGUAGE)
     prompt = build_prompt(title, facts, task)
-    key = hashlib.sha256(f"{settings.AI_MODEL}\n{system}\n{prompt}".encode()).hexdigest()
+    key = hashlib.sha256(f"{model_name()}\n{system}\n{prompt}".encode()).hexdigest()
     stored = AIAdvice.objects.filter(key=key).first()
     if stored and not refresh:
         return Advice(
             stored.answer["summary"], stored.answer["tips"], stored.facts, True, stored.created_at
         )
 
-    client = client or _client()
+    if _local():
+        text, input_tokens, output_tokens = _ask_ollama(system, prompt)
+    else:
+        text, input_tokens, output_tokens = _ask_claude(client or _client(), system, prompt)
+    try:
+        answer = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise AIUnavailable("The AI answer was cut off. Try again.") from exc
+    answer["tips"] = answer.get("tips", [])[:3]
+    saved, _ = AIAdvice.objects.update_or_create(
+        key=key,
+        defaults={
+            "card": card,
+            "model": model_name(),
+            "facts": prompt,
+            "answer": answer,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+        },
+    )
+    return Advice(answer["summary"], answer["tips"], prompt, False, saved.created_at)
+
+
+def _ask_claude(client, system: str, prompt: str) -> tuple[str, int, int]:
     try:
         response = client.beta.messages.create(
             model=settings.AI_MODEL,
@@ -117,21 +154,57 @@ def advise(card: str, title: str, facts: dict, task: str, *, client=None, refres
     if response.stop_reason == "refusal":
         raise AIUnavailable("The AI declined to answer this one.")
     text = next((b.text for b in response.content if b.type == "text"), "")
-    try:
-        answer = json.loads(text)
-    except json.JSONDecodeError as exc:
-        raise AIUnavailable("The AI answer was cut off. Try again.") from exc
-    answer["tips"] = answer.get("tips", [])[:3]
     usage = response.usage
-    saved, _ = AIAdvice.objects.update_or_create(
-        key=key,
-        defaults={
-            "card": card,
-            "model": settings.AI_MODEL,
-            "facts": prompt,
-            "answer": answer,
-            "input_tokens": getattr(usage, "input_tokens", 0) or 0,
-            "output_tokens": getattr(usage, "output_tokens", 0) or 0,
-        },
+    return (
+        text,
+        getattr(usage, "input_tokens", 0) or 0,
+        getattr(usage, "output_tokens", 0) or 0,
     )
-    return Advice(answer["summary"], answer["tips"], prompt, False, saved.created_at)
+
+
+def _post_json(url: str, body: dict, timeout: int) -> dict:
+    request = urllib.request.Request(
+        url, json.dumps(body).encode(), {"Content-Type": "application/json"}
+    )
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.load(response)
+
+
+def _ask_ollama(system: str, prompt: str) -> tuple[str, int, int]:
+    """Ollama's chat API with the same JSON schema. Thinking tokens count in num_predict.
+
+    The language is repeated last: a small model that thinks in English tends to answer in it.
+    """
+    reminder = f"\n\nWrite the summary and the tips in {settings.AI_LANGUAGE}."
+    body = {
+        "model": settings.OLLAMA_MODEL,
+        "stream": False,
+        "think": settings.OLLAMA_THINK,
+        "format": SCHEMA,
+        "options": {"temperature": 0.2, "num_ctx": 8192, "num_predict": 6000},
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt + reminder},
+        ],
+    }
+    url = settings.OLLAMA_URL.rstrip("/") + "/api/chat"
+    try:
+        response = _post_json(url, body, timeout=600)
+    except urllib.error.HTTPError as exc:
+        if exc.code == 404:
+            raise AIUnavailable(
+                f"Ollama does not have {settings.OLLAMA_MODEL}. "
+                f"Run: ollama pull {settings.OLLAMA_MODEL}"
+            ) from exc
+        raise AIUnavailable(f"Ollama answered with an error ({exc.code}).") from exc
+    except TimeoutError as exc:
+        raise AIUnavailable("The local model took too long. Try again.") from exc
+    except urllib.error.URLError as exc:
+        raise AIUnavailable("Could not reach Ollama. Is the Ollama app running?") from exc
+    if response.get("done_reason") == "length":
+        raise AIUnavailable("The AI answer was cut off. Try again.")
+    return (
+        response.get("message", {}).get("content", ""),
+        response.get("prompt_eval_count", 0) or 0,
+        response.get("eval_count", 0) or 0,
+    )
