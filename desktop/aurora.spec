@@ -1,5 +1,7 @@
 # PyInstaller spec: `make app` (or `pyinstaller desktop/aurora.spec`).
 # Output: dist/Aurora/ (a folder with the Aurora program), plus dist/Aurora.app on macOS.
+# The window comes from pywebview; its PyInstaller hook (pyinstaller-hooks-contrib) adds
+# the platform files.
 # One folder rather than one file: it starts in seconds instead of unpacking pandas each time.
 
 import sys
@@ -28,7 +30,7 @@ a = Analysis(
     pathex=[str(ROOT)],
     binaries=binaries,
     datas=datas,
-    hiddenimports=hidden + ["waitress"],
+    hiddenimports=hidden + ["waitress", "webview"],
     excludes=["pytest", "IPython", "matplotlib", "tkinter", "notebook"],
 )
 pyz = PYZ(a.pure)
@@ -38,7 +40,7 @@ exe = EXE(
     [],
     exclude_binaries=True,
     name="Aurora",
-    console=True,  # the window shows where the data is; closing it stops Aurora
+    console=False,  # Aurora has its own window; output goes to aurora.log in the data folder
 )
 coll = COLLECT(exe, a.binaries, a.datas, name="Aurora")
 
@@ -47,5 +49,9 @@ if sys.platform == "darwin":
         coll,
         name="Aurora.app",
         bundle_identifier="io.github.lordbalouch.aurora",
-        info_plist={"CFBundleShortVersionString": "1.0.0", "LSBackgroundOnly": False},
+        info_plist={
+            "CFBundleShortVersionString": "1.1.0",
+            "LSBackgroundOnly": False,
+            "NSHighResolutionCapable": True,
+        },
     )

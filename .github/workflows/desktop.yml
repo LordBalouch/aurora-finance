@@ -34,20 +34,27 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt -r requirements-desktop.txt
       - run: pyinstaller --noconfirm --log-level WARN desktop/aurora.spec
+      - name: The window toolkit is in the package
+        env:
+          AURORA_DATA_DIR: ${{ runner.temp }}/aurora-check
+          AURORA_CHECK_WINDOW: "1"
+        run: '"${{ matrix.exe }}"'
       - name: Smoke test (start, answer, stop)
         env:
           AURORA_DATA_DIR: ${{ runner.temp }}/aurora-data
           AURORA_NO_BROWSER: "1"
         run: |
+          # A windowed program has no console: its output goes to aurora.log in the data folder.
           "${{ matrix.exe }}" > app.log 2>&1 &
+          log() { cat app.log "$AURORA_DATA_DIR/aurora.log" 2>/dev/null; }
           for i in $(seq 1 120); do
             curl -sf http://127.0.0.1:8765/ping/ && break
             sleep 1
           done
           for p in / /ask/ /settings/ /import/ /static/css/app.css; do
-            curl -sf -o /dev/null "http://127.0.0.1:8765$p" || { cat app.log; exit 1; }
+            curl -sf -o /dev/null "http://127.0.0.1:8765$p" || { log; exit 1; }
           done
-          cat app.log
+          log
       - name: Zip
         run: |
           cd dist

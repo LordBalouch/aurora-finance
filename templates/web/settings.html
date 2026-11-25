@@ -5,7 +5,7 @@
 <div class="stack">
   <section class="card">
     <div class="card-head"><h2 class="card-title">AI</h2><span class="chip chip-ai">{% if ai_available %}on{% else %}off{% endif %}</span></div>
-    <p class="card-insight">AI is optional: every page except Aurora's take and Ask works without it. Claude gives the best answers. A local model through <a href="https://ollama.com">Ollama</a> is free and keeps everything on this machine. Any OpenAI-compatible service (OpenAI, Gemini, Mistral, LM Studio …) works too.</p>
+    <p class="card-insight">AI is optional: every page except Aurora's take and Ask works without it. Claude gives the best answers. A local model through <a href="https://ollama.com" target="_blank" rel="noopener">Ollama</a> is free and keeps everything on this machine. Any OpenAI-compatible service (OpenAI, Gemini, Mistral, LM Studio …) works too.</p>
     <form method="post" class="settings-form">
       {% csrf_token %}
       {% if form.non_field_errors %}<p class="msg msg-error">{{ form.non_field_errors|join:" " }}</p>{% endif %}
@@ -41,7 +41,7 @@
     <p class="card-insight">Everything lives in one file on this machine: {{ db.transactions }} transactions in {{ db.accounts }} account{{ db.accounts|pluralize }}{% if db.size_mb %}, {{ db.size_mb }} MB{% endif %}. Nothing is stored online. Keep a backup somewhere safe, for example an encrypted disk or your own cloud folder.</p>
     <p class="mono-path">{{ db.path }}</p>
     <div class="actions">
-      <a class="btn btn-primary" href="{% url 'web:backup' %}">Download a backup</a>
+      <a class="btn btn-primary" href="{% url 'web:backup' %}" download>Download a backup</a>
     </div>
     <form class="restore" method="post" action="{% url 'web:restore' %}" enctype="multipart/form-data" data-confirm="Replace all data in Aurora with this backup? The current data is saved to data/backups first.">
       {% csrf_token %}

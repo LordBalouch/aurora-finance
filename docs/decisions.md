@@ -44,3 +44,7 @@ Short and in no particular order. Each one says what was chosen, and why.
 - **Demo data goes through the real pipeline.** The generator writes bank-style text, and
   the real rules categorize it. The demo therefore shows how the categorizer actually
   behaves, and screenshots never need real data.
+- **The desktop app is a local server in a native window.** A launcher starts the Django
+  app on 127.0.0.1 and shows it with pywebview, which uses the system's own web view, so
+  the download stays small and the web code is the same as in development. Closing the
+  window stops the server. Without a web view Aurora falls back to the browser.

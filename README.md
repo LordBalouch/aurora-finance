@@ -43,8 +43,8 @@ a folder you own.
 
 1. Download `Aurora-macOS.zip` or `Aurora-Windows.zip` from the
    [latest release](https://github.com/LordBalouch/aurora-finance/releases/latest) and unzip it.
-2. Start **Aurora**. A small window shows where your data is kept, and the app opens in
-   your browser. Close the window, or click **Quit Aurora** in the menu, to stop it.
+2. Start **Aurora**. It opens in its own window, like any other program, and closing the
+   window stops it. Nothing else needs installing: no Python, no browser, no terminal.
    - macOS: the app is not signed with an Apple developer account, so the first time,
      right-click it, choose **Open** and confirm.
    - Windows: if SmartScreen warns, choose **More info → Run anyway**.
@@ -52,6 +52,9 @@ a folder you own.
 
 Your data is in `~/Library/Application Support/Aurora` (macOS) or `%APPDATA%\Aurora`
 (Windows). Settings → Download a backup saves all of it as one file.
+
+The window is the system's own web view (WebKit on macOS, Edge WebView2 on Windows, which
+Windows 10 and 11 already have), showing a server that only this computer can reach.
 
 ## Quick start (from source)
 
