@@ -46,7 +46,7 @@ jobs:
         run: |
           # A windowed program has no console: its output goes to aurora.log in the data folder.
           "${{ matrix.exe }}" > app.log 2>&1 &
-          log() { cat app.log "$AURORA_DATA_DIR/aurora.log" 2>/dev/null; }
+          log() { cat app.log "$AURORA_DATA_DIR/aurora.log" 2>/dev/null || true; }
           for i in $(seq 1 120); do
             curl -sf http://127.0.0.1:8765/ping/ && break
             sleep 1
