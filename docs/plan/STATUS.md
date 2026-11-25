@@ -1,7 +1,7 @@
 # Status
 
 **Current phase:** 7 done except 7.7 (Norwegian UI, postponed)
-**Next task:** owner tries the desktop app and Ask; then 7.7 or real-world bank exports
+**Next task:** owner tries the desktop app and Ask; then 7.7. Other banks' layouts are verified only if a user reports a problem (the owner has no accounts there).
 
 | Phase | File | State |
 |---|---|---|

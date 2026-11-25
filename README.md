@@ -17,7 +17,7 @@ I built it for my own finances, and as a data-analysis project. It runs locally,
 
 | | |
 |---|---|
-| **Import** | CSV and XLSX exports from Norwegian banks (DNB, Nordea, SpareBank 1, Bank Norwegian, Revolut and others with similar columns). An unknown layout asks once which column is which, and remembers it. Re-importing an overlapping file adds nothing, and any import can be undone. |
+| **Import** | CSV and XLSX exports from Norwegian banks. DNB is tested with real exports. Layouts for Nordea, SpareBank 1, Bank Norwegian and Revolut follow their documented export formats but have not been tried with real files yet. An unknown layout asks once which column is which, and remembers it. Re-importing an overlapping file adds nothing, and any import can be undone. |
 | **Categorize** | About 250 built-in rules for Norwegian merchants, plus your own rules. An inbox lists whatever is still uncategorized. |
 | **Dashboard** | Income, spending, net and savings rate, each compared with the previous month and the 12-month average. Click any bar to see the transactions behind it. |
 | **Trends** | Spending per group month by month, fixed against variable costs, and small multiples on one shared scale. |
