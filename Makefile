@@ -37,7 +37,8 @@ demo:
 	$(DEMO) $(PY) manage.py make_demo_data
 	$(DEMO) $(PY) manage.py runserver 8012
 
-# The desktop app from source: your own data folder, opens the browser (see desktop/launcher.py).
+# The desktop app from source: your own data folder, in its own window if pywebview is
+# installed (pip install -r requirements-desktop.txt), else the browser. See desktop/launcher.py.
 desktop:
 	$(PY) desktop/launcher.py
 
